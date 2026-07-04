@@ -95,6 +95,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "ShoeLuxe — Sneakers, elevated" },
+      { name: "description", content: "Get curated branded and unbranded high-quality sneakers." },
+      { property: "og:description", content: "Get curated branded and unbranded high-quality sneakers." },
+      { name: "twitter:description", content: "Get curated branded and unbranded high-quality sneakers." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/jDvet6z9vhZAT1XTlKiRDh2ryJF2/social-images/social-1783182839878-e.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/jDvet6z9vhZAT1XTlKiRDh2ryJF2/social-images/social-1783182839878-e.webp" },
     ],
     links: [
       {
