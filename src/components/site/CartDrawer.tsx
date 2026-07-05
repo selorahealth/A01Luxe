@@ -1,13 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useCart, cartKey } from "@/lib/cart";
 import { formatMoney } from "@/lib/format";
 import { Icon } from "./Icon";
-import { CheckoutModal } from "./CheckoutModal";
 
 export function CartDrawer() {
   const cart = useCart();
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   return (
     <>
@@ -98,20 +96,27 @@ export function CartDrawer() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-semibold text-base">{formatMoney(cart.totalCents)}</span>
                   </div>
-                  <button
-                    onClick={() => setCheckoutOpen(true)}
-                    className="btn-primary w-full"
+                  <Link
+                    to="/checkout"
+                    onClick={() => cart.setOpen(false)}
+                    className="btn-primary w-full justify-center"
                   >
                     Checkout
                     <Icon name="arrow-forward-outline" size={18} />
-                  </button>
+                  </Link>
+                  <Link
+                    to="/cart"
+                    onClick={() => cart.setOpen(false)}
+                    className="block text-center text-xs uppercase tracking-widest text-muted-foreground hover:text-primary"
+                  >
+                    View full cart
+                  </Link>
                 </div>
               )}
             </motion.aside>
           </>
         )}
       </AnimatePresence>
-      <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
     </>
   );
 }
