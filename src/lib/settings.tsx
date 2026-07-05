@@ -19,7 +19,7 @@ export type HeroSettings = {
   overlay: number;
 };
 
-export type CtaSettings = { heading: string; sub: string; button: string };
+export type CtaSettings = { heading: string; sub: string; button: string; mediaUrl?: string };
 
 export type FooterSettings = {
   about: string;
