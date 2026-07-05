@@ -26,7 +26,7 @@ export function ProductCard({ p, index = 0 }: { p: ProductRow; index?: number })
       <Link
         to="/product/$slug"
         params={{ slug: p.slug }}
-        className="group block rounded-2xl bg-card overflow-hidden border border-border/60 hover:shadow-xl transition-shadow"
+        className="group block bg-card overflow-hidden border border-border hover:border-primary transition-colors"
       >
         <div className="relative aspect-square bg-muted/50 overflow-hidden">
           {img ? (
@@ -41,20 +41,20 @@ export function ProductCard({ p, index = 0 }: { p: ProductRow; index?: number })
             </div>
           )}
           {soldOut && (
-            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-semibold bg-foreground text-background">
+            <div className="absolute top-3 left-3 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest bg-destructive text-destructive-foreground">
               Sold Out
             </div>
           )}
         </div>
-        <div className="p-4">
+        <div className="p-4 border-t border-border">
           {p.brand && (
-            <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold">
               {p.brand}
             </div>
           )}
-          <div className="mt-0.5 flex items-baseline justify-between gap-2">
-            <h3 className="font-display font-semibold text-base truncate">{p.name}</h3>
-            <span className="font-semibold shrink-0">{formatMoney(p.price_cents)}</span>
+          <div className="mt-1 flex items-baseline justify-between gap-2">
+            <h3 className="font-display font-bold text-base truncate uppercase">{p.name}</h3>
+            <span className="font-mono font-bold shrink-0">{formatMoney(p.price_cents)}</span>
           </div>
         </div>
       </Link>

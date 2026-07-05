@@ -80,6 +80,7 @@ export type Database = {
           featured: boolean
           id: string
           images: string[]
+          low_stock_threshold: number
           name: string
           price_cents: number
           purchases: number
@@ -98,6 +99,7 @@ export type Database = {
           featured?: boolean
           id?: string
           images?: string[]
+          low_stock_threshold?: number
           name: string
           price_cents?: number
           purchases?: number
@@ -116,6 +118,7 @@ export type Database = {
           featured?: boolean
           id?: string
           images?: string[]
+          low_stock_threshold?: number
           name?: string
           price_cents?: number
           purchases?: number
