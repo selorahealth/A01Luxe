@@ -14,7 +14,7 @@ const search = z.object({
 
 export const Route = createFileRoute("/thank-you")({
   validateSearch: (s) => search.parse(s),
-  head: () => ({ meta: [{ title: "Thank you — ShoeLuxe" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Thank you — A01Luxe" }, { name: "robots", content: "noindex" }] }),
   component: ThankYou,
 });
 
@@ -26,7 +26,7 @@ function ThankYou() {
   const digits = (p?.whatsappNumber ?? "").replace(/[^0-9]/g, "");
   const waHref = digits
     ? `https://wa.me/${digits}?text=${encodeURIComponent(
-        `Hi ${s?.brand ?? "ShoeLuxe"}! I just paid for order ${order} (${money.format(total)}). Here's my receipt:`,
+        `Hi ${s?.brand ?? "A01Luxe"}! I just paid for order ${order} (${money.format(total)}). Here's my receipt:`,
       )}`
     : null;
   const [copied, setCopied] = useState<string | null>(null);
