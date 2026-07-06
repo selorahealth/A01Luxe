@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Icon } from "./Icon";
 import { useSiteSettings } from "@/lib/settings";
+import { Link, useRouterState } from "@tanstack/react-router";
 
 export function Hero() {
   const { data: settings } = useSiteSettings();
@@ -68,13 +69,13 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-8 flex flex-wrap gap-3 justify-center"
         >
-          <a href="#shop" className="btn-primary">
+          <a href="/shop" className="btn-primary">
             {hero?.ctaPrimary ?? "Shop the Drop"}
             <Icon name="arrow-forward-outline" size={18} />
           </a>
           {hero?.ctaSecondary && (
             <a
-              href="#shop"
+              href="/shop"
               className={`inline-flex items-center gap-2 rounded-full px-5 py-3 font-medium border transition-colors ${
                 hero?.mediaUrl
                   ? "border-white/60 text-white hover:bg-white/10"
