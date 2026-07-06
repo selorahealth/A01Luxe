@@ -10,7 +10,7 @@ const cards = [
 ];
 
 export const Route = createFileRoute("/customer-care")({
-  head: () => ({ meta: [{ title: "Customer Care — ShoeLuxe" }] }),
+  head: () => ({ meta: [{ title: "Customer Care — A01Luxe" }] }),
   component: () => (
     <PageShell title="Customer Care" eyebrow="// We're here to help">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 grid gap-4 sm:grid-cols-2">
