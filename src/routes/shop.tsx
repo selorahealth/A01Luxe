@@ -12,10 +12,10 @@ export const Route = createFileRoute("/shop")({
   validateSearch: (s) => search.parse(s),
   head: () => ({
     meta: [
-      { title: "Shop — ShoeLuxe" },
-      { name: "description", content: "Browse the full ShoeLuxe collection of branded and unbranded sneakers." },
-      { property: "og:title", content: "Shop — ShoeLuxe" },
-      { property: "og:description", content: "Browse the full ShoeLuxe collection." },
+      { title: "Shop — A01Luxe" },
+      { name: "description", content: "Browse the full A01Luxe collection of branded and unbranded sneakers." },
+      { property: "og:title", content: "Shop — A01Luxe" },
+      { property: "og:description", content: "Browse the full A01Luxe collection." },
     ],
   }),
   component: Shop,
