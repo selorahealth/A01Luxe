@@ -82,8 +82,7 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>{f?.copyright ?? `© ${new Date().getFullYear()} ${brand}. All rights reserved.`}</p>
-          <p className="uppercase tracking-widest">Neo-Industrial Edition</p>
+          <p>{f?.copyright ?? `Copyright (c) ${new Date().getFullYear()} ${brand}. All rights reserved.`}</p>
         </div>
       </div>
     </footer>

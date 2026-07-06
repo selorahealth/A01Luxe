@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/PageShell";
 import { useCart, cartKey } from "@/lib/cart";
-import { formatMoney } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 import { Icon } from "@/components/site/Icon";
 
 export const Route = createFileRoute("/cart")({
@@ -11,6 +11,7 @@ export const Route = createFileRoute("/cart")({
 
 function CartPage() {
   const cart = useCart();
+  const money = useMoney();
   return (
     <PageShell title="Your Cart" eyebrow="// Bag">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 grid gap-8 lg:grid-cols-[1fr_360px]">
@@ -50,7 +51,7 @@ function CartPage() {
                             <Icon name="add-outline" size={16} />
                           </button>
                         </div>
-                        <span className="font-mono font-bold">{formatMoney(i.price_cents * i.qty)}</span>
+                        <span className="font-mono font-bold">{money.format(i.price_cents * i.qty)}</span>
                       </div>
                     </div>
                   </li>
@@ -63,7 +64,7 @@ function CartPage() {
           <h3 className="font-display uppercase font-bold text-lg">Order Summary</h3>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
-            <span className="font-mono font-bold">{formatMoney(cart.totalCents)}</span>
+            <span className="font-mono font-bold">{money.format(cart.totalCents)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Shipping</span>

@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Icon } from "@/components/site/Icon";
-import { formatMoney, padImages } from "@/lib/format";
+import { padImages } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 import { useCart } from "@/lib/cart";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -228,7 +229,7 @@ function BuyPanel({ product, reviews }: { product: Product; reviews: Review[] })
           {rating.value.toFixed(1)} · {rating.label}
         </span>
       </div>
-      <div className="mt-4 text-3xl font-display font-bold">{formatMoney(product.price_cents)}</div>
+      <PriceBlock cents={product.price_cents} />
       <p className="mt-4 text-muted-foreground leading-relaxed">{description}</p>
 
       {product.sizes.length > 0 && (
@@ -283,11 +284,14 @@ function BuyPanel({ product, reviews }: { product: Product; reviews: Review[] })
           {!soldOut && <Icon name="bag-add-outline" size={18} />}
         </button>
       </div>
-      {!soldOut && (
-        <p className="mt-2 text-xs text-muted-foreground">{product.stock} left in stock</p>
-      )}
+      {/* stock count intentionally hidden from customers */}
     </div>
   );
+}
+
+function PriceBlock({ cents }: { cents: number }) {
+  const money = useMoney();
+  return <div className="mt-4 text-3xl font-display font-bold">{money.format(cents)}</div>;
 }
 
 function Reviews({

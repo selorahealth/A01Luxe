@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { useSiteSettings } from "@/lib/settings";
-import { formatMoney } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 import { PageShell } from "@/components/site/PageShell";
 import { Icon } from "@/components/site/Icon";
 import { useEffect, useState } from "react";
@@ -21,11 +21,12 @@ export const Route = createFileRoute("/thank-you")({
 function ThankYou() {
   const { order, total } = Route.useSearch();
   const { data: s } = useSiteSettings();
+  const money = useMoney();
   const p = s?.payment;
   const digits = (p?.whatsappNumber ?? "").replace(/[^0-9]/g, "");
   const waHref = digits
     ? `https://wa.me/${digits}?text=${encodeURIComponent(
-        `Hi ${s?.brand ?? "ShoeLuxe"}! I just paid for order ${order} (${formatMoney(total)}). Here's my receipt:`,
+        `Hi ${s?.brand ?? "ShoeLuxe"}! I just paid for order ${order} (${money.format(total)}). Here's my receipt:`,
       )}`
     : null;
   const [copied, setCopied] = useState<string | null>(null);
@@ -48,7 +49,7 @@ function ThankYou() {
 
         <div className="mt-8 border border-border p-6 text-left space-y-3">
           <Row label="Order ID" value={order} onCopy={() => copy("order", order)} copied={copied === "order"} />
-          <Row label="Amount" value={formatMoney(total)} />
+          <Row label="Amount" value={money.format(total)} />
           {p?.bankName && <Row label="Bank" value={p.bankName} />}
           {p?.accountName && <Row label="Account name" value={p.accountName} />}
           {p?.accountNumber && (
@@ -71,7 +72,7 @@ function ThankYou() {
             className="mt-6 w-full inline-flex items-center justify-center gap-2 px-5 py-4 text-white font-black uppercase text-base sm:text-lg tracking-widest shadow-lg active:scale-[0.98] transition-transform"
             style={{ backgroundColor: "#25D366" }}
           >
-            <Icon name="logo-whatsapp" size={22} />
+            <Icon name="receipt-outline" size={22} />
             Upload your receipt here after payment
           </motion.a>
         ) : (

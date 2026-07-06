@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
@@ -108,6 +108,24 @@ export function OrdersTab() {
 }
 
 function OrderModal({ order, onClose, onStatus }: { order: Order; onClose: () => void; onStatus: (s: string) => void }) {
+  const productIds = useMemo(
+    () => Array.from(new Set((order.items ?? []).map((i) => i.product_id).filter(Boolean))),
+    [order],
+  );
+  const { data: ccMap } = useQuery({
+    queryKey: ["order-cc", order.id, productIds],
+    enabled: productIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,cc")
+        .in("id", productIds);
+      if (error) throw error;
+      const map: Record<string, string | null> = {};
+      (data ?? []).forEach((r: { id: string; cc: string | null }) => { map[r.id] = r.cc; });
+      return map;
+    },
+  });
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-black/50 z-50" />
@@ -136,25 +154,34 @@ function OrderModal({ order, onClose, onStatus }: { order: Order; onClose: () =>
             <div className="font-medium">{order.customer?.name}</div>
             <div className="text-sm text-muted-foreground">{order.customer?.email}</div>
             <div className="text-sm text-muted-foreground">{order.customer?.phone}</div>
-            <div className="text-sm text-muted-foreground whitespace-pre-line mt-1">{order.customer?.address}</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2">Location</div>
+            <div className="text-sm text-muted-foreground whitespace-pre-line">{order.customer?.address}</div>
           </div>
         </div>
 
         <div className="rounded-2xl bg-card border border-border p-4 mb-3">
           <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Items</h4>
           <div className="space-y-2">
-            {order.items?.map((i, idx) => (
-              <div key={idx} className="flex items-center gap-3">
-                <img src={i.image} alt="" className="h-12 w-12 rounded-lg object-cover bg-muted" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">{i.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {i.size ? `Size ${i.size} · ` : ""}Qty {i.qty}
+            {order.items?.map((i, idx) => {
+              const cc = ccMap?.[i.product_id];
+              return (
+                <div key={idx} className="flex items-center gap-3">
+                  <img src={i.image} alt="" className="h-12 w-12 rounded-lg object-cover bg-muted" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{i.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {i.size ? `Size ${i.size} · ` : ""}Qty {i.qty}
+                    </div>
+                    {cc && (
+                      <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-primary border border-primary/40 px-1.5 py-0.5">
+                        CC · {cc}
+                      </div>
+                    )}
                   </div>
+                  <div className="text-sm font-medium">{formatMoney(i.price_cents * i.qty)}</div>
                 </div>
-                <div className="text-sm font-medium">{formatMoney(i.price_cents * i.qty)}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Total</span>

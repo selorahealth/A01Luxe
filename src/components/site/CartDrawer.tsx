@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { useCart, cartKey } from "@/lib/cart";
-import { formatMoney } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 import { Icon } from "./Icon";
 
 export function CartDrawer() {
   const cart = useCart();
+  const money = useMoney();
 
   return (
     <>
@@ -81,7 +82,7 @@ export function CartDrawer() {
                               </button>
                             </div>
                             <span className="font-semibold">
-                              {formatMoney(i.price_cents * i.qty)}
+                              {money.format(i.price_cents * i.qty)}
                             </span>
                           </div>
                         </div>
@@ -94,7 +95,7 @@ export function CartDrawer() {
                 <div className="p-5 border-t border-border space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-semibold text-base">{formatMoney(cart.totalCents)}</span>
+                    <span className="font-semibold text-base">{money.format(cart.totalCents)}</span>
                   </div>
                   <Link
                     to="/checkout"

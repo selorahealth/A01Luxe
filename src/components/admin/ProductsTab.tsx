@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@/components/site/Icon";
 import { formatMoney, padImages, slugify } from "@/lib/format";
+import { uploadMedia } from "@/lib/upload";
 
 type Product = {
   id: string;
@@ -20,6 +21,7 @@ type Product = {
   sold_out: boolean;
   images: string[];
   featured: boolean;
+  cc: string | null;
 };
 
 type Cat = { id: string; name: string; slug: string };
@@ -153,6 +155,7 @@ function emptyProduct(): Product {
     sold_out: false,
     images: [],
     featured: false,
+    cc: "",
   };
 }
 
@@ -188,6 +191,7 @@ function ProductDrawer({
       sold_out: p.sold_out,
       images: p.images.filter(Boolean).slice(0, 4),
       featured: p.featured,
+      cc: p.cc?.trim() || null,
     };
     const q = isNew
       ? supabase.from("products").insert(payload)
@@ -223,6 +227,7 @@ function ProductDrawer({
           <TF label="Name" value={p.name} onChange={(v) => setP({ ...p, name: v })} />
           <TF label="Slug (optional)" value={p.slug} onChange={(v) => setP({ ...p, slug: v })} />
           <TF label="Brand (or leave empty for unbranded)" value={p.brand ?? ""} onChange={(v) => setP({ ...p, brand: v })} />
+          <TF label="CC — Source store (internal · not shown to customers)" value={p.cc ?? ""} onChange={(v) => setP({ ...p, cc: v })} />
           <TF label="Description" value={p.description ?? ""} onChange={(v) => setP({ ...p, description: v })} textarea />
           <div className="grid grid-cols-2 gap-3">
             <NF label="Price (cents)" value={p.price_cents} onChange={(v) => setP({ ...p, price_cents: v })} />
@@ -235,27 +240,10 @@ function ProductDrawer({
           </div>
           <ToggleRow label="Mark as sold out" value={p.sold_out} onChange={(v) => setP({ ...p, sold_out: v })} />
           <ToggleRow label="Featured" value={p.featured} onChange={(v) => setP({ ...p, featured: v })} />
-          <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground">Images (up to 4 URLs)</label>
-            <div className="mt-1 space-y-2">
-              {[0, 1, 2, 3].map((i) => (
-                <input
-                  key={i}
-                  placeholder={`Image URL ${i + 1}`}
-                  value={p.images[i] ?? ""}
-                  onChange={(e) => {
-                    const arr = [...p.images];
-                    arr[i] = e.target.value;
-                    setP({ ...p, images: arr });
-                  }}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 ring-primary/30"
-                />
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              If you only add one image, the storefront will auto-duplicate it into the slider.
-            </p>
-          </div>
+          <ImageUploader
+            images={p.images}
+            onChange={(imgs) => setP({ ...p, images: imgs })}
+          />
         </div>
         <div className="p-4 border-t border-border">
           <button onClick={save} disabled={busy} className="btn-primary w-full">
@@ -313,6 +301,76 @@ function ToggleRow({ label, value, onChange }: { label: string; value: boolean; 
         <span className={`absolute top-0.5 h-5 w-5 bg-white rounded-full transition-transform ${value ? "translate-x-5" : "translate-x-0.5"}`} />
       </button>
     </label>
+  );
+}
+
+function ImageUploader({ images, onChange }: { images: string[]; onChange: (v: string[]) => void }) {
+  const [busy, setBusy] = useState<number | null>(null);
+  async function upload(idx: number, file: File | null) {
+    if (!file) return;
+    setBusy(idx);
+    try {
+      const url = await uploadMedia(file, "products");
+      const arr = [...images];
+      arr[idx] = url;
+      onChange(arr);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+  function remove(idx: number) {
+    const arr = [...images];
+    arr[idx] = "";
+    onChange(arr.filter(Boolean));
+  }
+  return (
+    <div>
+      <label className="text-xs uppercase tracking-wider text-muted-foreground">Product images (up to 4)</label>
+      <div className="mt-2 grid grid-cols-4 gap-2">
+        {[0, 1, 2, 3].map((i) => {
+          const src = images[i];
+          return (
+            <div key={i} className="relative aspect-square border border-border bg-muted/40 overflow-hidden">
+              {src ? (
+                <>
+                  <img src={src} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => remove(i)}
+                    className="absolute top-1 right-1 h-6 w-6 grid place-items-center bg-black/60 text-white rounded-full"
+                    aria-label="Remove image"
+                  >
+                    <Icon name="close-outline" size={14} />
+                  </button>
+                </>
+              ) : (
+                <label className="absolute inset-0 grid place-items-center cursor-pointer hover:bg-foreground/5 text-muted-foreground">
+                  {busy === i ? (
+                    <span className="text-[10px] uppercase tracking-widest">Uploading…</span>
+                  ) : (
+                    <div className="text-center">
+                      <Icon name="cloud-upload-outline" size={20} />
+                      <div className="text-[10px] uppercase tracking-widest mt-1">Upload</div>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => upload(i, e.target.files?.[0] ?? null)}
+                  />
+                </label>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-xs text-muted-foreground mt-2">
+        Upload up to 4 images directly from your device. If you add just one, the storefront duplicates it into the slider.
+      </p>
+    </div>
   );
 }
 

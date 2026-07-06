@@ -37,6 +37,8 @@ import {
   Eye,
   ExternalLink,
   Music2,
+  Receipt,
+  ShoppingBasket,
   type LucideIcon,
 } from "lucide-react";
 
@@ -81,7 +83,35 @@ const MAP: Record<string, LucideIcon> = {
   "create-outline": Edit,
   "eye-outline": Eye,
   "open-outline": ExternalLink,
+  "receipt-outline": Receipt,
+  "document-text-outline": Receipt,
+  "basket-outline": ShoppingBasket,
 };
+
+// Premium, elegant tote / handbag icon rendered inline as an SVG.
+// Replaces the generic shopping-bag glyph while keeping the same public API.
+function PremiumBagIcon({ size, className, style }: { size: number; className?: string; style?: CSSProperties }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      style={style}
+      aria-hidden="true"
+    >
+      <path d="M4.2 8h15.6l-1.1 11.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8L4.2 8Z" />
+      <path d="M8.5 8V6a3.5 3.5 0 0 1 7 0v2" />
+      <path d="M9 12h6" />
+    </svg>
+  );
+}
 
 export function Icon({
   name,
@@ -94,7 +124,10 @@ export function Icon({
   style?: CSSProperties;
   size?: number | string;
 }) {
-  const Cmp = MAP[name] ?? Info;
   const px = typeof size === "number" ? size : parseInt(String(size), 10) || 20;
+  if (name === "bag-outline" || name === "premium-bag") {
+    return <PremiumBagIcon size={px} className={className} style={style} />;
+  }
+  const Cmp = MAP[name] ?? Info;
   return <Cmp size={px} className={className} style={style} strokeWidth={1.75} />;
 }

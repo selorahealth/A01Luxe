@@ -15,6 +15,7 @@ import { AuthProvider } from "@/lib/auth";
 import { CartProvider } from "@/lib/cart";
 import { CartDrawer } from "@/components/site/CartDrawer";
 import { ThemeApplier, useSiteSettings } from "@/lib/settings";
+import { CurrencyProvider } from "@/lib/currency";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -137,10 +138,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <ThemeGate />
-          <Outlet />
-          <CartDrawer />
-          <Toaster />
+          <CurrencyProvider>
+            <ThemeGate />
+            <Outlet />
+            <CartDrawer />
+            <Toaster />
+          </CurrencyProvider>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>

@@ -1,15 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Icon } from "@/components/site/Icon";
 import { formatMoney } from "@/lib/format";
 import { toast } from "sonner";
+import { AnimatePresence, motion } from "framer-motion";
 
-type Order = { id: string; order_id: string; total_cents: number; created_at: string; customer: { name?: string } };
+type OrderItem = { name: string; image: string; qty: number; price_cents: number; size?: string | null; product_id: string };
+type Order = {
+  id: string;
+  order_id: string;
+  total_cents: number;
+  created_at: string;
+  status: string;
+  customer: { name?: string; email?: string; phone?: string; address?: string };
+  items: OrderItem[];
+};
 type StockRow = { id: string; name: string; slug: string; stock: number; sold_out: boolean; low_stock_threshold: number };
 
 export function NotificationsTab() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [openOrder, setOpenOrder] = useState<Order | null>(null);
   const { data: stock, refetch } = useQuery({
     queryKey: ["admin-stock-alerts"],
     queryFn: async () => {
@@ -28,7 +39,7 @@ export function NotificationsTab() {
   useEffect(() => {
     supabase
       .from("orders")
-      .select("id,order_id,total_cents,created_at,customer")
+      .select("id,order_id,total_cents,created_at,customer,items,status")
       .order("created_at", { ascending: false })
       .limit(30)
       .then(({ data }) => setOrders((data ?? []) as unknown as Order[]));
@@ -90,20 +101,108 @@ export function NotificationsTab() {
         </div>
       )}
       {orders.map((o) => (
-        <div key={o.id} className="bg-card border border-border p-4 flex items-center gap-3">
+        <button
+          key={o.id}
+          onClick={() => setOpenOrder(o)}
+          className="w-full text-left bg-card border border-border p-4 flex items-center gap-3 hover:border-primary transition-colors"
+        >
           <div className="h-10 w-10 bg-primary/15 text-primary grid place-items-center">
             <Icon name="cart-outline" size={18} />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-medium truncate">New order · {o.order_id}</div>
+            <div className="font-medium truncate">
+              New order · <span className="font-mono">{o.order_id}</span>
+            </div>
             <div className="text-xs text-muted-foreground">
               {o.customer?.name ?? "Customer"} · {new Date(o.created_at).toLocaleString()}
             </div>
+            <div className="text-xs text-muted-foreground truncate">
+              {(o.items ?? []).length} item{(o.items ?? []).length === 1 ? "" : "s"}
+              {o.items?.[0]?.name ? ` · ${o.items[0].name}` : ""}
+              {o.items && o.items.length > 1 ? ` · +${o.items.length - 1} more` : ""}
+            </div>
           </div>
           <div className="font-semibold shrink-0">{formatMoney(o.total_cents)}</div>
-        </div>
+        </button>
       ))}
       </section>
+
+      <AnimatePresence>
+        {openOrder && <OrderPeek order={openOrder} onClose={() => setOpenOrder(null)} />}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function OrderPeek({ order, onClose }: { order: Order; onClose: () => void }) {
+  const productIds = useMemo(
+    () => Array.from(new Set((order.items ?? []).map((i) => i.product_id).filter(Boolean))),
+    [order],
+  );
+  const { data: ccMap } = useQuery({
+    queryKey: ["notify-order-cc", order.id, productIds],
+    enabled: productIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("id,cc").in("id", productIds);
+      if (error) throw error;
+      const map: Record<string, string | null> = {};
+      (data ?? []).forEach((r: { id: string; cc: string | null }) => { map[r.id] = r.cc; });
+      return map;
+    },
+  });
+  return (
+    <>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-black/50 z-50" />
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.98 }}
+        transition={{ type: "spring", damping: 24, stiffness: 260 }}
+        className="fixed inset-x-3 top-1/2 -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-[560px] max-h-[90vh] overflow-y-auto z-[60] bg-background p-6 shadow-2xl border border-border"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-display text-xl font-bold">Order {order.order_id}</h3>
+            <p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleString()}</p>
+          </div>
+          <button onClick={onClose} className="h-9 w-9 grid place-items-center hover:bg-foreground/5"><Icon name="close-outline" size={22} /></button>
+        </div>
+        <div className="bg-card border border-border p-4 mb-3">
+          <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Customer</h4>
+          <div className="font-medium">{order.customer?.name}</div>
+          <div className="text-sm text-muted-foreground">{order.customer?.email}</div>
+          <div className="text-sm text-muted-foreground">{order.customer?.phone}</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2">Location</div>
+          <div className="text-sm text-muted-foreground whitespace-pre-line">{order.customer?.address}</div>
+        </div>
+        <div className="bg-card border border-border p-4">
+          <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Items</h4>
+          <div className="space-y-2">
+            {order.items?.map((i, idx) => {
+              const cc = ccMap?.[i.product_id];
+              return (
+                <div key={idx} className="flex items-center gap-3">
+                  <img src={i.image} alt="" className="h-12 w-12 object-cover bg-muted" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{i.name}</div>
+                    <div className="text-xs text-muted-foreground">{i.size ? `Size ${i.size} · ` : ""}Qty {i.qty}</div>
+                    {cc && (
+                      <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-primary border border-primary/40 px-1.5 py-0.5">
+                        CC · {cc}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-sm font-medium">{formatMoney(i.price_cents * i.qty)}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Total</span>
+            <span className="font-display text-lg font-bold">{formatMoney(order.total_cents)}</span>
+          </div>
+        </div>
+      </motion.div>
+    </>
   );
 }

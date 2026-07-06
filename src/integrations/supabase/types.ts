@@ -75,6 +75,7 @@ export type Database = {
         Row: {
           brand: string | null
           category_id: string | null
+          cc: string | null
           created_at: string
           description: string | null
           featured: boolean
@@ -94,6 +95,7 @@ export type Database = {
         Insert: {
           brand?: string | null
           category_id?: string | null
+          cc?: string | null
           created_at?: string
           description?: string | null
           featured?: boolean
@@ -113,6 +115,7 @@ export type Database = {
         Update: {
           brand?: string | null
           category_id?: string | null
+          cc?: string | null
           created_at?: string
           description?: string | null
           featured?: boolean
@@ -185,6 +188,7 @@ export type Database = {
         Row: {
           brand: string
           cta: Json
+          currency: Json
           footer: Json
           hero: Json
           id: number
@@ -198,6 +202,7 @@ export type Database = {
         Insert: {
           brand?: string
           cta?: Json
+          currency?: Json
           footer?: Json
           hero?: Json
           id?: number
@@ -211,6 +216,7 @@ export type Database = {
         Update: {
           brand?: string
           cta?: Json
+          currency?: Json
           footer?: Json
           hero?: Json
           id?: number
