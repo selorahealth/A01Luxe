@@ -83,20 +83,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ShoeLuxe — Sneakers, elevated" },
+      { title: "A01Luxe — Sneakers, elevated" },
       {
         name: "description",
         content:
           "Curated branded and unbranded high-quality sneakers. Shop the drop with fast checkout and real-time stock.",
       },
-      { property: "og:title", content: "ShoeLuxe — Sneakers, elevated" },
+      { property: "og:title", content: "A01Luxe — Sneakers, elevated" },
       {
         property: "og:description",
         content: "Curated branded and unbranded high-quality sneakers.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "ShoeLuxe — Sneakers, elevated" },
+      { name: "twitter:title", content: "A01Luxe — Sneakers, elevated" },
       { name: "description", content: "Get curated branded and unbranded high-quality sneakers." },
       { property: "og:description", content: "Get curated branded and unbranded high-quality sneakers." },
       { name: "twitter:description", content: "Get curated branded and unbranded high-quality sneakers." },
