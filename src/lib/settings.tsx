@@ -47,6 +47,8 @@ export type PaymentSettings = {
   instructions: string;
 };
 
+export type CurrencySettings = { symbol: string; code: string };
+
 export type SiteSettings = {
   id: number;
   brand: string;
@@ -58,6 +60,7 @@ export type SiteSettings = {
   footer: FooterSettings;
   theme: ThemeSettings;
   payment: PaymentSettings;
+  currency: CurrencySettings;
 };
 
 export const settingsQueryKey = ["site_settings"] as const;
