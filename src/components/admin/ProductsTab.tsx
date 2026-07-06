@@ -304,6 +304,76 @@ function ToggleRow({ label, value, onChange }: { label: string; value: boolean; 
   );
 }
 
+function ImageUploader({ images, onChange }: { images: string[]; onChange: (v: string[]) => void }) {
+  const [busy, setBusy] = useState<number | null>(null);
+  async function upload(idx: number, file: File | null) {
+    if (!file) return;
+    setBusy(idx);
+    try {
+      const url = await uploadMedia(file, "products");
+      const arr = [...images];
+      arr[idx] = url;
+      onChange(arr);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+  function remove(idx: number) {
+    const arr = [...images];
+    arr[idx] = "";
+    onChange(arr.filter(Boolean));
+  }
+  return (
+    <div>
+      <label className="text-xs uppercase tracking-wider text-muted-foreground">Product images (up to 4)</label>
+      <div className="mt-2 grid grid-cols-4 gap-2">
+        {[0, 1, 2, 3].map((i) => {
+          const src = images[i];
+          return (
+            <div key={i} className="relative aspect-square border border-border bg-muted/40 overflow-hidden">
+              {src ? (
+                <>
+                  <img src={src} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => remove(i)}
+                    className="absolute top-1 right-1 h-6 w-6 grid place-items-center bg-black/60 text-white rounded-full"
+                    aria-label="Remove image"
+                  >
+                    <Icon name="close-outline" size={14} />
+                  </button>
+                </>
+              ) : (
+                <label className="absolute inset-0 grid place-items-center cursor-pointer hover:bg-foreground/5 text-muted-foreground">
+                  {busy === i ? (
+                    <span className="text-[10px] uppercase tracking-widest">Uploading…</span>
+                  ) : (
+                    <div className="text-center">
+                      <Icon name="cloud-upload-outline" size={20} />
+                      <div className="text-[10px] uppercase tracking-widest mt-1">Upload</div>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => upload(i, e.target.files?.[0] ?? null)}
+                  />
+                </label>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-xs text-muted-foreground mt-2">
+        Upload up to 4 images directly from your device. If you add just one, the storefront duplicates it into the slider.
+      </p>
+    </div>
+  );
+}
+
 function CatManager({ cats, subs }: { cats: Cat[]; subs: Sub[] }) {
   const [open, setOpen] = useState(false);
   const [newCat, setNewCat] = useState("");
