@@ -5,8 +5,8 @@ import { Icon } from "@/components/site/Icon";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({ meta: [
-    { title: "Contact — ShoeLuxe" },
-    { name: "description", content: "Reach the ShoeLuxe team — email, phone, WhatsApp." },
+    { title: "Contact — A01Luxe" },
+    { name: "description", content: "Reach the A01Luxe team — email, phone, WhatsApp." },
   ]}),
   component: Contact,
 });
