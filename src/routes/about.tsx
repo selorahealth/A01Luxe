@@ -3,10 +3,10 @@ import { PageShell, Prose } from "@/components/site/PageShell";
 
 export const Route = createFileRoute("/about")({
   head: () => ({ meta: [
-    { title: "About — ShoeLuxe" },
-    { name: "description", content: "The story behind ShoeLuxe: curated branded and unbranded sneakers, built for the streets." },
-    { property: "og:title", content: "About ShoeLuxe" },
-    { property: "og:description", content: "The story behind the ShoeLuxe collection." },
+    { title: "About — A01Luxe" },
+    { name: "description", content: "The story behind A01Luxe: curated branded and unbranded sneakers, built for the streets." },
+    { property: "og:title", content: "About A01Luxe" },
+    { property: "og:description", content: "The story behind the A01Luxe collection." },
   ]}),
   component: () => (
     <PageShell title="About Us" eyebrow="// The Story">
