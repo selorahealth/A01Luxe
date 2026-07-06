@@ -3,7 +3,8 @@ import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
-import { formatMoney, generateOrderId } from "@/lib/format";
+import { generateOrderId } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 import { Icon } from "./Icon";
 import { PaymentModal } from "./PaymentModal";
 
