@@ -5,7 +5,7 @@ import { useMoney } from "@/lib/currency";
 import { Icon } from "@/components/site/Icon";
 
 export const Route = createFileRoute("/cart")({
-  head: () => ({ meta: [{ title: "Cart — ShoeLuxe" }] }),
+  head: () => ({ meta: [{ title: "Cart — A01Luxe" }] }),
   component: CartPage,
 });
 
