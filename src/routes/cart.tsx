@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/site/PageShell";
 import { useCart, cartKey } from "@/lib/cart";
-import { formatMoney } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 import { Icon } from "@/components/site/Icon";
 
 export const Route = createFileRoute("/cart")({
