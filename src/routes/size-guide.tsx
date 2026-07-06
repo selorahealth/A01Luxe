@@ -12,7 +12,7 @@ const rows = [
 ];
 
 export const Route = createFileRoute("/size-guide")({
-  head: () => ({ meta: [{ title: "Size Guide — ShoeLuxe" }] }),
+  head: () => ({ meta: [{ title: "Size Guide — A01Luxe" }] }),
   component: () => (
     <PageShell title="Size Guide" eyebrow="// Find your fit">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
