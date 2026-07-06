@@ -4,7 +4,8 @@ import { z } from "zod";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
-import { formatMoney, generateOrderId } from "@/lib/format";
+import { generateOrderId } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 import { PageShell } from "@/components/site/PageShell";
 import { Icon } from "@/components/site/Icon";
 
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/checkout")({
 function Checkout() {
   const cart = useCart();
   const navigate = useNavigate();
+  const money = useMoney();
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "" });
   const [err, setErr] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -75,7 +77,9 @@ function Checkout() {
           <h2 className="font-display uppercase font-bold text-xl">Delivery Details</h2>
           {(["name", "email", "phone", "address"] as const).map((k) => (
             <div key={k}>
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{k}</label>
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+                {k === "address" ? "Location" : k}
+              </label>
               {k === "address" ? (
                 <textarea rows={3} value={form[k]} onChange={(e) => setForm((f) => ({ ...f, [k]: e.target.value }))}
                   className="mt-1 w-full border border-border bg-card px-3 py-2 outline-none focus:border-primary" />
@@ -97,12 +101,12 @@ function Checkout() {
             {cart.items.map((i, idx) => (
               <li key={idx} className="flex justify-between gap-2">
                 <span className="truncate">{i.qty}× {i.name}{i.size ? ` (${i.size})` : ""}</span>
-                <span className="font-mono">{formatMoney(i.price_cents * i.qty)}</span>
+                <span className="font-mono">{money.format(i.price_cents * i.qty)}</span>
               </li>
             ))}
           </ul>
           <div className="pt-3 border-t border-border flex justify-between font-bold">
-            <span>Total</span><span className="font-mono">{formatMoney(cart.totalCents)}</span>
+            <span>Total</span><span className="font-mono">{money.format(cart.totalCents)}</span>
           </div>
         </aside>
       </motion.div>
