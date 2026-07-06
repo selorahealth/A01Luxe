@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, Prose } from "@/components/site/PageShell";
 
 export const Route = createFileRoute("/care")({
-  head: () => ({ meta: [{ title: "Care Instructions — ShoeLuxe" }] }),
+  head: () => ({ meta: [{ title: "Care Instructions — A01Luxe" }] }),
   component: () => (
     <PageShell title="Care Instructions" eyebrow="// Keep them fresh">
       <Prose>
