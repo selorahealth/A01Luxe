@@ -17,6 +17,7 @@ const schema = z.object({
 
 export function CheckoutModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const cart = useCart();
+  const money = useMoney();
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "" });
   const [err, setErr] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -103,7 +104,7 @@ export function CheckoutModal({ open, onClose }: { open: boolean; onClose: () =>
                 {(["name", "email", "phone", "address"] as const).map((k) => (
                   <div key={k}>
                     <label className="text-xs uppercase tracking-wider text-muted-foreground">
-                      {k}
+                      {k === "address" ? "Location" : k}
                     </label>
                     {k === "address" ? (
                       <textarea
@@ -126,7 +127,7 @@ export function CheckoutModal({ open, onClose }: { open: boolean; onClose: () =>
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-sm text-muted-foreground">Total</span>
                   <span className="font-display text-xl font-bold">
-                    {formatMoney(cart.totalCents)}
+                    {money.format(cart.totalCents)}
                   </span>
                 </div>
                 <button
