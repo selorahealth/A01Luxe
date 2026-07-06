@@ -17,7 +17,7 @@ const schema = z.object({
 });
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — ShoeLuxe" }] }),
+  head: () => ({ meta: [{ title: "Checkout — A01Luxe" }] }),
   component: Checkout,
 });
 
