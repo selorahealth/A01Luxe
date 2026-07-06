@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@/components/site/Icon";
 import { formatMoney, padImages, slugify } from "@/lib/format";
+import { uploadMedia } from "@/lib/upload";
 
 type Product = {
   id: string;
@@ -20,6 +21,7 @@ type Product = {
   sold_out: boolean;
   images: string[];
   featured: boolean;
+  cc: string | null;
 };
 
 type Cat = { id: string; name: string; slug: string };
@@ -153,6 +155,7 @@ function emptyProduct(): Product {
     sold_out: false,
     images: [],
     featured: false,
+    cc: "",
   };
 }
 
@@ -188,6 +191,7 @@ function ProductDrawer({
       sold_out: p.sold_out,
       images: p.images.filter(Boolean).slice(0, 4),
       featured: p.featured,
+      cc: p.cc?.trim() || null,
     };
     const q = isNew
       ? supabase.from("products").insert(payload)
@@ -223,6 +227,7 @@ function ProductDrawer({
           <TF label="Name" value={p.name} onChange={(v) => setP({ ...p, name: v })} />
           <TF label="Slug (optional)" value={p.slug} onChange={(v) => setP({ ...p, slug: v })} />
           <TF label="Brand (or leave empty for unbranded)" value={p.brand ?? ""} onChange={(v) => setP({ ...p, brand: v })} />
+          <TF label="CC — Source store (internal · not shown to customers)" value={p.cc ?? ""} onChange={(v) => setP({ ...p, cc: v })} />
           <TF label="Description" value={p.description ?? ""} onChange={(v) => setP({ ...p, description: v })} textarea />
           <div className="grid grid-cols-2 gap-3">
             <NF label="Price (cents)" value={p.price_cents} onChange={(v) => setP({ ...p, price_cents: v })} />
@@ -235,27 +240,10 @@ function ProductDrawer({
           </div>
           <ToggleRow label="Mark as sold out" value={p.sold_out} onChange={(v) => setP({ ...p, sold_out: v })} />
           <ToggleRow label="Featured" value={p.featured} onChange={(v) => setP({ ...p, featured: v })} />
-          <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground">Images (up to 4 URLs)</label>
-            <div className="mt-1 space-y-2">
-              {[0, 1, 2, 3].map((i) => (
-                <input
-                  key={i}
-                  placeholder={`Image URL ${i + 1}`}
-                  value={p.images[i] ?? ""}
-                  onChange={(e) => {
-                    const arr = [...p.images];
-                    arr[i] = e.target.value;
-                    setP({ ...p, images: arr });
-                  }}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 ring-primary/30"
-                />
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              If you only add one image, the storefront will auto-duplicate it into the slider.
-            </p>
-          </div>
+          <ImageUploader
+            images={p.images}
+            onChange={(imgs) => setP({ ...p, images: imgs })}
+          />
         </div>
         <div className="p-4 border-t border-border">
           <button onClick={save} disabled={busy} className="btn-primary w-full">
