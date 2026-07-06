@@ -13,11 +13,12 @@ export function PaymentModal({
   onClose: () => void;
 }) {
   const { data: settings } = useSiteSettings();
+  const money = useMoney();
   const p = settings?.payment;
   const digits = (p?.whatsappNumber ?? "").replace(/[^0-9]/g, "");
   const waHref = digits
     ? `https://wa.me/${digits}?text=${encodeURIComponent(
-        `Hi! I just paid for order ${orderId} (${formatMoney(totalCents)}). Here's my receipt:`,
+        `Hi! I just paid for order ${orderId} (${money.format(totalCents)}). Here's my receipt:`,
       )}`
     : null;
 
@@ -47,7 +48,7 @@ export function PaymentModal({
 
         <div className="rounded-2xl bg-card border border-border p-4 space-y-3">
           <Row label="Order ID" value={orderId} copyable />
-          <Row label="Amount" value={formatMoney(totalCents)} />
+          <Row label="Amount" value={money.format(totalCents)} />
           {p?.bankName && <Row label="Bank" value={p.bankName} />}
           {p?.accountName && <Row label="Account name" value={p.accountName} />}
           {p?.accountNumber && <Row label="Account number" value={p.accountNumber} copyable />}
@@ -69,7 +70,7 @@ export function PaymentModal({
             className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-4 text-white font-semibold text-base sm:text-lg shadow-lg active:scale-[0.98] transition-transform"
             style={{ backgroundColor: "#25D366" }}
           >
-            <Icon name="logo-whatsapp" size={22} />
+            <Icon name="receipt-outline" size={22} />
             Upload your receipt here after payment
           </motion.a>
         ) : (
