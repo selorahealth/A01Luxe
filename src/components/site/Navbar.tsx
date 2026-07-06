@@ -39,7 +39,7 @@ export function Navbar() {
   const Logo = (
     <Link to="/" className="flex items-center gap-2 min-w-0">
       {logoUrl ? (
-        <img src={logoUrl} alt={brand} className="h-8 w-8 rounded-full object-cover shrink-0" />
+        <img src={logoUrl} alt={brand} className="h-8 w-8 object-cover shrink-0" />
       ) : (
         <div className="h-9 w-9 shrink-0 rounded-full bg-primary text-primary-foreground grid place-items-center font-display font-bold">
           {brand.charAt(0)}
