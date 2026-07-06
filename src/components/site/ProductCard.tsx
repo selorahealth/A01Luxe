@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { formatMoney, padImages } from "@/lib/format";
+import { padImages } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 
 export type ProductRow = {
   id: string;
@@ -16,6 +17,7 @@ export type ProductRow = {
 export function ProductCard({ p, index = 0 }: { p: ProductRow; index?: number }) {
   const img = padImages(p.images)[0];
   const soldOut = p.sold_out || p.stock <= 0;
+  const money = useMoney();
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -54,7 +56,7 @@ export function ProductCard({ p, index = 0 }: { p: ProductRow; index?: number })
           )}
           <div className="mt-1 flex items-baseline justify-between gap-2">
             <h3 className="font-display font-bold text-base truncate uppercase">{p.name}</h3>
-            <span className="font-mono font-bold shrink-0">{formatMoney(p.price_cents)}</span>
+            <span className="font-mono font-bold shrink-0">{money.format(p.price_cents)}</span>
           </div>
         </div>
       </Link>
