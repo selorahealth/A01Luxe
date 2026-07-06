@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useSiteSettings } from "@/lib/settings";
-import { formatMoney } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 import { Icon } from "./Icon";
 
 export function PaymentModal({
