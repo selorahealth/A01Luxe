@@ -25,8 +25,8 @@ async function fetchTaxonomy() {
 export function ProductsSection({
   categorySlug,
   subSlug,
-  title = "Fresh Pairs",
-  eyebrow = "// The Collection",
+  title = "Featured Products",
+  eyebrow = "// Featured",
 }: {
   categorySlug?: string;
   subSlug?: string;

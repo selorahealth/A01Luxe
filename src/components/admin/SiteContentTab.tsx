@@ -166,8 +166,7 @@ export function SiteContentTab() {
                   <Field label="Phone" value={draft.footer.phone} onChange={(v) => setD("footer", { ...draft.footer, phone: v })} />
                   <Field label="Email" value={draft.footer.email} onChange={(v) => setD("footer", { ...draft.footer, email: v })} />
                   <Field label="Instagram URL" value={draft.footer.socials.instagram ?? ""} onChange={(v) => setD("footer", { ...draft.footer, socials: { ...draft.footer.socials, instagram: v } })} />
-                  <Field label="TikTok URL" value={draft.footer.socials.tiktok ?? ""} onChange={(v) => setD("footer", { ...draft.footer, socials: { ...draft.footer.socials, tiktok: v } })} />
-                  <Field label="Facebook URL" value={draft.footer.socials.facebook ?? ""} onChange={(v) => setD("footer", { ...draft.footer, socials: { ...draft.footer.socials, facebook: v } })} />
+                  <Field label="WhatsApp Channel URL (used in footer + Join CTA)" value={draft.footer.socials.whatsappChannel ?? ""} onChange={(v) => setD("footer", { ...draft.footer, socials: { ...draft.footer.socials, whatsappChannel: v } })} />
                   <Field label="Copyright" value={draft.footer.copyright} onChange={(v) => setD("footer", { ...draft.footer, copyright: v })} />
                   <p className="text-xs text-muted-foreground">Column links use the default layout. Edit them in the Advanced JSON below.</p>
                   <JsonField
@@ -196,6 +195,18 @@ export function SiteContentTab() {
                   <Field label="Account number" value={draft.payment.accountNumber} onChange={(v) => setD("payment", { ...draft.payment, accountNumber: v })} />
                   <Field label="WhatsApp number (with country code, digits only)" value={draft.payment.whatsappNumber} onChange={(v) => setD("payment", { ...draft.payment, whatsappNumber: v })} />
                   <Field label="Instructions" value={draft.payment.instructions} onChange={(v) => setD("payment", { ...draft.payment, instructions: v })} textarea />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field
+                      label={`Delivery fee — Lagos (${draft.currency?.symbol ?? "₦"})`}
+                      value={String(Math.round((draft.payment.deliveryLagosCents ?? 200000) / 100))}
+                      onChange={(v) => setD("payment", { ...draft.payment, deliveryLagosCents: Math.max(0, Math.round(Number(v.replace(/[^\d.]/g, "")) || 0) * 100) })}
+                    />
+                    <Field
+                      label={`Delivery fee — Outside Lagos (${draft.currency?.symbol ?? "₦"}, 0 = contact)`}
+                      value={String(Math.round((draft.payment.deliveryOutsideCents ?? 0) / 100))}
+                      onChange={(v) => setD("payment", { ...draft.payment, deliveryOutsideCents: Math.max(0, Math.round(Number(v.replace(/[^\d.]/g, "")) || 0) * 100) })}
+                    />
+                  </div>
                 </>
               )}
               {s.id === "currency" && (

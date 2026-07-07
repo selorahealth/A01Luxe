@@ -50,18 +50,13 @@ export function Footer() {
             </div>
             <div className="flex gap-2 mt-4">
               {socials.instagram && (
-                <a href={socials.instagram} aria-label="Instagram" className="h-9 w-9 border border-border grid place-items-center hover:border-primary hover:text-primary transition-colors">
+                <a href={socials.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className="h-9 w-9 border border-border grid place-items-center hover:border-primary hover:text-primary transition-colors">
                   <Icon name="logo-instagram" size={16} />
                 </a>
               )}
-              {socials.tiktok && (
-                <a href={socials.tiktok} aria-label="TikTok" className="h-9 w-9 border border-border grid place-items-center hover:border-primary hover:text-primary transition-colors">
-                  <Icon name="logo-tiktok" size={16} />
-                </a>
-              )}
-              {socials.facebook && (
-                <a href={socials.facebook} aria-label="Facebook" className="h-9 w-9 border border-border grid place-items-center hover:border-primary hover:text-primary transition-colors">
-                  <Icon name="logo-facebook" size={16} />
+              {socials.whatsappChannel && (
+                <a href={socials.whatsappChannel} target="_blank" rel="noreferrer" aria-label="WhatsApp Channel" className="h-9 w-9 border border-border grid place-items-center hover:border-primary hover:text-primary transition-colors">
+                  <Icon name="logo-whatsapp" size={16} />
                 </a>
               )}
             </div>

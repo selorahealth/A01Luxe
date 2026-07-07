@@ -10,7 +10,7 @@ export function generateOrderId() {
   const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
   let s = "";
   for (let i = 0; i < 6; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
-  return `SL-${s}`;
+  return `A01L-${s}`;
 }
 
 export function padImages(images: string[]): string[] {

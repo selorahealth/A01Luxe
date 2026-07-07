@@ -26,7 +26,7 @@ export type FooterSettings = {
   address: string;
   phone: string;
   email: string;
-  socials: { instagram?: string; tiktok?: string; facebook?: string };
+  socials: { instagram?: string; tiktok?: string; facebook?: string; whatsappChannel?: string };
   columns: { title: string; links: { label: string; href: string }[] }[];
   copyright: string;
 };
@@ -45,6 +45,8 @@ export type PaymentSettings = {
   accountNumber: string;
   whatsappNumber: string;
   instructions: string;
+  deliveryLagosCents?: number;
+  deliveryOutsideCents?: number;
 };
 
 export type CurrencySettings = { symbol: string; code: string };
@@ -72,7 +74,7 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
 }
 
 export function useSiteSettings() {
-  return useQuery({ queryKey: settingsQueryKey, queryFn: fetchSiteSettings, staleTime: 30_000 });
+  return useQuery({ queryKey: settingsQueryKey, queryFn: fetchSiteSettings, staleTime: 0, refetchOnWindowFocus: true, refetchOnMount: true });
 }
 
 export function applyThemeToDocument(theme: ThemeSettings) {

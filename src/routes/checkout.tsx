@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
 import { generateOrderId } from "@/lib/format";
 import { useMoney } from "@/lib/currency";
+import { useSiteSettings } from "@/lib/settings";
 import { PageShell } from "@/components/site/PageShell";
 import { Icon } from "@/components/site/Icon";
 
@@ -13,7 +14,9 @@ const schema = z.object({
   name: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(200),
   phone: z.string().trim().min(5).max(30),
+  phone2: z.string().trim().max(30).optional().or(z.literal("")),
   address: z.string().trim().min(5).max(500),
+  lagos: z.boolean(),
 });
 
 export const Route = createFileRoute("/checkout")({
@@ -25,9 +28,15 @@ function Checkout() {
   const cart = useCart();
   const navigate = useNavigate();
   const money = useMoney();
-  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "" });
+  const { data: settings } = useSiteSettings();
+  const [form, setForm] = useState({ name: "", email: "", phone: "", phone2: "", address: "", lagos: true });
   const [err, setErr] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const deliveryLagos = settings?.payment?.deliveryLagosCents ?? 200000; // ₦2,000
+  const deliveryOutside = settings?.payment?.deliveryOutsideCents ?? 0;
+  const deliveryFee = form.lagos ? deliveryLagos : deliveryOutside;
+  const grandTotal = cart.totalCents + deliveryFee;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,9 +51,16 @@ function Checkout() {
         product_id: i.productId, name: i.name, image: i.image,
         size: i.size ?? null, qty: i.qty, price_cents: i.price_cents,
       }));
-      const total = cart.totalCents;
+      const total = grandTotal;
       const { error } = await supabase.from("orders").insert({
-        order_id: orderId, customer: parsed.data, items,
+        order_id: orderId,
+        customer: {
+          ...parsed.data,
+          delivery_zone: form.lagos ? "lagos" : "outside",
+          delivery_fee_cents: deliveryFee,
+          subtotal_cents: cart.totalCents,
+        },
+        items,
         total_cents: total, status: "pending",
       });
       if (error) throw error;
@@ -75,21 +91,36 @@ function Checkout() {
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-6xl mx-auto px-4 sm:px-6 py-10 grid gap-8 lg:grid-cols-[1fr_360px]">
         <form onSubmit={submit} className="border border-border p-6 space-y-4">
           <h2 className="font-display uppercase font-bold text-xl">Delivery Details</h2>
-          {(["name", "email", "phone", "address"] as const).map((k) => (
-            <div key={k}>
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
-                {k === "address" ? "Location" : k}
-              </label>
-              {k === "address" ? (
-                <textarea rows={3} value={form[k]} onChange={(e) => setForm((f) => ({ ...f, [k]: e.target.value }))}
-                  className="mt-1 w-full border border-border bg-card px-3 py-2 outline-none focus:border-primary" />
-              ) : (
-                <input type={k === "email" ? "email" : k === "phone" ? "tel" : "text"} value={form[k]}
-                  onChange={(e) => setForm((f) => ({ ...f, [k]: e.target.value }))}
-                  className="mt-1 w-full border border-border bg-card px-3 py-2 outline-none focus:border-primary" />
-              )}
+          {([
+            { k: "name", label: "Full name", type: "text" },
+            { k: "email", label: "Email", type: "email" },
+            { k: "phone", label: "Phone", type: "tel" },
+            { k: "phone2", label: "Secondary phone (optional)", type: "tel" },
+          ] as const).map((f) => (
+            <div key={f.k}>
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{f.label}</label>
+              <input type={f.type} value={form[f.k]}
+                onChange={(e) => setForm((s) => ({ ...s, [f.k]: e.target.value }))}
+                className="mt-1 w-full border border-border bg-card px-3 py-2 outline-none focus:border-primary" />
             </div>
           ))}
+          <div>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Location</label>
+            <textarea rows={3} value={form.address}
+              onChange={(e) => setForm((s) => ({ ...s, address: e.target.value }))}
+              className="mt-1 w-full border border-border bg-card px-3 py-2 outline-none focus:border-primary" />
+          </div>
+          <div className="border border-border p-3 space-y-2">
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Delivery zone</div>
+            <label className="flex items-center gap-2 cursor-pointer text-sm">
+              <input type="radio" checked={form.lagos} onChange={() => setForm((s) => ({ ...s, lagos: true }))} />
+              <span>Within Lagos <span className="text-muted-foreground">({money.format(deliveryLagos)})</span></span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer text-sm">
+              <input type="radio" checked={!form.lagos} onChange={() => setForm((s) => ({ ...s, lagos: false }))} />
+              <span>Outside Lagos <span className="text-muted-foreground">({deliveryOutside > 0 ? money.format(deliveryOutside) : "we'll contact you"})</span></span>
+            </label>
+          </div>
           {err && <p className="text-sm text-destructive">{err}</p>}
           <button type="submit" disabled={submitting} className="btn-primary w-full justify-center disabled:opacity-60">
             {submitting ? "Placing order…" : "Place order"} <Icon name="arrow-forward-outline" size={18} />
@@ -105,8 +136,16 @@ function Checkout() {
               </li>
             ))}
           </ul>
-          <div className="pt-3 border-t border-border flex justify-between font-bold">
-            <span>Total</span><span className="font-mono">{money.format(cart.totalCents)}</span>
+          <div className="pt-3 border-t border-border text-sm flex justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="font-mono">{money.format(cart.totalCents)}</span>
+          </div>
+          <div className="text-sm flex justify-between">
+            <span className="text-muted-foreground">Delivery {form.lagos ? "(Lagos)" : "(Outside)"}</span>
+            <span className="font-mono">{deliveryFee > 0 ? money.format(deliveryFee) : "—"}</span>
+          </div>
+          <div className="pt-3 border-t border-border flex justify-between font-bold text-lg">
+            <span>Total</span><span className="font-mono">{money.format(grandTotal)}</span>
           </div>
         </aside>
       </motion.div>
