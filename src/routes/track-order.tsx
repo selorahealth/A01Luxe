@@ -10,7 +10,7 @@ const search = z.object({ id: z.string().optional() });
 
 export const Route = createFileRoute("/track-order")({
   validateSearch: (s) => search.parse(s),
-  head: () => ({ meta: [{ title: "Track Order — ShoeLuxe" }] }),
+  head: () => ({ meta: [{ title: "Track Order — A01Luxe" }] }),
   component: Track,
 });
 
