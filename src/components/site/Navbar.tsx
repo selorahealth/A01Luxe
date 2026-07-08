@@ -27,7 +27,7 @@ export function Navbar() {
     showUserIcon: true,
     showCart: true,
   };
-  const brand = settings?.brand ?? "ShoeLuxe";
+  const brand = settings?.brand ?? "A01Luxe";
   const logoUrl = settings?.logo_url;
 
   const navItems: NavItem[] = [

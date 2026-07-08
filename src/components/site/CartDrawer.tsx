@@ -56,6 +56,9 @@ export function CartDrawer() {
                               {i.size && (
                                 <p className="text-xs text-muted-foreground">Size {i.size}</p>
                               )}
+                              {i.color && (
+                                <p className="text-xs text-muted-foreground">Color {i.color}</p>
+                              )}
                             </div>
                             <button
                               aria-label="Remove"

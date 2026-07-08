@@ -36,6 +36,7 @@ function CartPage() {
                         <div>
                           <p className="font-display font-bold uppercase">{i.name}</p>
                           {i.size && <p className="text-xs text-muted-foreground mt-0.5">Size {i.size}</p>}
+                          {i.color && <p className="text-xs text-muted-foreground mt-0.5">Color {i.color}</p>}
                         </div>
                         <button onClick={() => cart.remove(k)} aria-label="Remove" className="text-muted-foreground hover:text-destructive">
                           <Icon name="trash-outline" size={18} />

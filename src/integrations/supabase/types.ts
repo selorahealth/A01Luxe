@@ -76,9 +76,11 @@ export type Database = {
           brand: string | null
           category_id: string | null
           cc: string | null
+          colors: string[]
           created_at: string
           description: string | null
           featured: boolean
+          has_other_colors: boolean
           id: string
           images: string[]
           low_stock_threshold: number
@@ -96,9 +98,11 @@ export type Database = {
           brand?: string | null
           category_id?: string | null
           cc?: string | null
+          colors?: string[]
           created_at?: string
           description?: string | null
           featured?: boolean
+          has_other_colors?: boolean
           id?: string
           images?: string[]
           low_stock_threshold?: number
@@ -116,9 +120,11 @@ export type Database = {
           brand?: string | null
           category_id?: string | null
           cc?: string | null
+          colors?: string[]
           created_at?: string
           description?: string | null
           featured?: boolean
+          has_other_colors?: boolean
           id?: string
           images?: string[]
           low_stock_threshold?: number
@@ -290,6 +296,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_order_public: {
+        Args: {
+          _customer: Json
+          _items: Json
+          _order_id: string
+          _total_cents: number
+        }
+        Returns: boolean
+      }
       decrement_stock: {
         Args: { _product_id: string; _qty: number }
         Returns: undefined
@@ -302,6 +317,20 @@ export type Database = {
         Returns: boolean
       }
       is_staff_or_admin: { Args: { _user_id: string }; Returns: boolean }
+      track_order_public: {
+        Args: { _order_id: string }
+        Returns: {
+          created_at: string
+          items: Json
+          order_id: string
+          status: string
+          total_cents: number
+        }[]
+      }
+      upload_receipt_public: {
+        Args: { _order_id: string; _receipt_url: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "staff"

@@ -5,9 +5,6 @@
 @import "@fontsource/montserrat/500.css";
 @import "@fontsource/montserrat/600.css";
 @import "@fontsource/montserrat/700.css";
-@import "@fontsource/space-grotesk/500.css";
-@import "@fontsource/space-grotesk/600.css";
-@import "@fontsource/space-grotesk/700.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -34,7 +31,7 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
   --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", "Montserrat", ui-sans-serif, sans-serif;
+  --font-display: "Montserrat", ui-sans-serif, sans-serif;
   --color-whatsapp: #25d366;
   --color-whatsapp-dark: #128c7e;
   --color-brand: var(--brand);
@@ -162,7 +159,7 @@
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 }
 
@@ -188,4 +185,8 @@
   box-shadow: 0 10px 30px -12px color-mix(in oklab, var(--primary) 45%, transparent);
   &:hover { transform: translateY(-1px); }
   &:active { transform: translateY(0); }
+}
+
+@utility touch-pinch-zoom {
+  touch-action: pinch-zoom;
 }

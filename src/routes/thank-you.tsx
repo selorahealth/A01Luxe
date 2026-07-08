@@ -6,6 +6,9 @@ import { useMoney } from "@/lib/currency";
 import { PageShell } from "@/components/site/PageShell";
 import { Icon } from "@/components/site/Icon";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { uploadMedia } from "@/lib/upload";
+import { toast } from "sonner";
 
 const search = z.object({
   order: z.string(),
@@ -24,15 +27,34 @@ function ThankYou() {
   const money = useMoney();
   const p = s?.payment;
   const digits = (p?.whatsappNumber ?? "").replace(/[^0-9]/g, "");
-  const waHref = digits
-    ? `https://wa.me/${digits}?text=${encodeURIComponent(
-        `Hi ${s?.brand ?? "A01Luxe"}! I just paid for order ${order} (${money.format(total)}). Here's my receipt:`,
-      )}`
-    : null;
   const [copied, setCopied] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   useEffect(() => { if (copied) { const t = setTimeout(() => setCopied(null), 1500); return () => clearTimeout(t); } }, [copied]);
   function copy(label: string, value: string) { navigator.clipboard?.writeText(value); setCopied(label); }
   const maskedAcct = p?.accountNumber ? p.accountNumber.replace(/.(?=.{4})/g, "•") : "";
+
+  async function uploadReceipt(file: File | null) {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadMedia(file, "receipts");
+      const { data, error } = await supabase.rpc("upload_receipt_public", {
+        _order_id: order,
+        _receipt_url: url,
+      });
+      if (error) throw error;
+      if (!data) throw new Error("Order not found");
+      toast.success("Receipt uploaded");
+      if (digits) {
+        const message = `Hi ${s?.brand ?? "A01Luxe"}! I just uploaded my receipt for order ${order} (${money.format(total)}). Receipt: ${url}`;
+        window.open(`https://wa.me/${digits}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Receipt upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   return (
     <PageShell>
@@ -61,20 +83,24 @@ function ThankYou() {
           <p className="mt-4 text-xs text-muted-foreground">{p.instructions}</p>
         )}
 
-        {waHref ? (
-          <motion.a
-            href={waHref}
-            target="_blank"
-            rel="noreferrer"
+        {digits ? (
+          <motion.label
             initial={{ scale: 1 }}
             animate={{ scale: [1, 1.02, 1] }}
             transition={{ repeat: Infinity, duration: 2.2 }}
-            className="mt-6 w-full inline-flex items-center justify-center gap-2 px-5 py-4 text-white font-black uppercase text-base sm:text-lg tracking-widest shadow-lg active:scale-[0.98] transition-transform"
+            className="mt-6 w-full inline-flex cursor-pointer items-center justify-center gap-2 px-5 py-4 text-white font-black uppercase text-base sm:text-lg tracking-widest shadow-lg active:scale-[0.98] transition-transform"
             style={{ backgroundColor: "#25D366" }}
           >
             <Icon name="receipt-outline" size={22} />
-            Upload your receipt here after payment
-          </motion.a>
+            {uploading ? "Uploading receipt…" : "Upload your receipt here after payment"}
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              disabled={uploading}
+              className="hidden"
+              onChange={(e) => uploadReceipt(e.target.files?.[0] ?? null)}
+            />
+          </motion.label>
         ) : (
           <p className="mt-5 text-sm text-destructive">WhatsApp number not set. Contact us via the details in the footer.</p>
         )}

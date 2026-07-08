@@ -7,6 +7,7 @@ export type CartItem = {
   price_cents: number;
   image: string;
   size?: string;
+  color?: string;
   qty: number;
   maxStock: number;
 };
@@ -24,10 +25,10 @@ type CartCtx = {
 };
 
 const Ctx = createContext<CartCtx | null>(null);
-const STORAGE = "shoeluxe.cart.v1";
+const STORAGE = "a01luxe.cart.v1";
 
-function keyOf(i: { productId: string; size?: string }) {
-  return `${i.productId}::${i.size ?? ""}`;
+function keyOf(i: { productId: string; size?: string; color?: string }) {
+  return `${i.productId}::${i.size ?? ""}::${i.color ?? ""}`;
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
