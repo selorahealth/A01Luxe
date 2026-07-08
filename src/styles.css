@@ -186,3 +186,7 @@
   &:hover { transform: translateY(-1px); }
   &:active { transform: translateY(0); }
 }
+
+@utility touch-pinch-zoom {
+  touch-action: pinch-zoom;
+}

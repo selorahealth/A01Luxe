@@ -12,6 +12,8 @@ export type ProductRow = {
   images: string[];
   stock: number;
   sold_out: boolean;
+  has_other_colors?: boolean;
+  colors?: string[];
 };
 
 export function ProductCard({ p, index = 0 }: { p: ProductRow; index?: number }) {

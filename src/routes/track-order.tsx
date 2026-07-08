@@ -32,13 +32,11 @@ function Track() {
   async function lookup(orderId: string) {
     setErr(null); setOrder(null); setBusy(true);
     try {
-      const { data, error } = await supabase.from("orders")
-        .select("order_id,status,total_cents,created_at,items")
-        .eq("order_id", orderId.trim())
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("track_order_public", { _order_id: orderId.trim() });
       if (error) throw error;
-      if (!data) setErr("No order found with that ID.");
-      else setOrder(data as unknown as OrderRow);
+      const found = data?.[0];
+      if (!found) setErr("No order found with that ID.");
+      else setOrder(found as unknown as OrderRow);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Something went wrong");
     } finally { setBusy(false); }
@@ -59,7 +57,7 @@ function Track() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-8">
         <form onSubmit={submit} className="flex gap-2 border border-border p-2">
           <input value={input} onChange={(e) => setInput(e.target.value)}
-            placeholder="e.g. SL-7F3K2A"
+            placeholder="e.g. A01L-7F3K2A"
             className="flex-1 bg-transparent px-3 py-3 outline-none uppercase font-mono" />
           <button className="btn-primary" disabled={busy || !input.trim()}>
             {busy ? "Looking…" : "Track"}

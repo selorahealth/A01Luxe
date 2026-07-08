@@ -8,7 +8,7 @@ import { Icon } from "./Icon";
 async function fetchProducts() {
   const { data, error } = await supabase
     .from("products")
-    .select("id,name,slug,brand,price_cents,images,stock,sold_out,category_id,subcategory_id")
+    .select("id,name,slug,brand,price_cents,images,stock,sold_out,category_id,subcategory_id,has_other_colors,colors")
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data as (ProductRow & { category_id: string | null; subcategory_id: string | null })[];

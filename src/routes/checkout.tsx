@@ -49,24 +49,22 @@ function Checkout() {
       const orderId = generateOrderId();
       const items = cart.items.map((i) => ({
         product_id: i.productId, name: i.name, image: i.image,
-        size: i.size ?? null, qty: i.qty, price_cents: i.price_cents,
+        size: i.size ?? null, color: i.color ?? null, qty: i.qty, price_cents: i.price_cents,
       }));
       const total = grandTotal;
-      const { error } = await supabase.from("orders").insert({
-        order_id: orderId,
-        customer: {
+      const { data, error } = await supabase.rpc("create_order_public", {
+        _order_id: orderId,
+        _customer: {
           ...parsed.data,
           delivery_zone: form.lagos ? "lagos" : "outside",
           delivery_fee_cents: deliveryFee,
           subtotal_cents: cart.totalCents,
         },
-        items,
-        total_cents: total, status: "pending",
+        _items: items,
+        _total_cents: total,
       });
       if (error) throw error;
-      await Promise.all(cart.items.map((i) =>
-        supabase.rpc("decrement_stock", { _product_id: i.productId, _qty: i.qty }),
-      ));
+      if (!data) throw new Error("Unable to create order");
       cart.clear();
       navigate({ to: "/thank-you", search: { order: orderId, total } });
     } catch (e2) {
@@ -131,7 +129,7 @@ function Checkout() {
           <ul className="text-sm space-y-2">
             {cart.items.map((i, idx) => (
               <li key={idx} className="flex justify-between gap-2">
-                <span className="truncate">{i.qty}× {i.name}{i.size ? ` (${i.size})` : ""}</span>
+                <span className="truncate">{i.qty}× {i.name}{i.size ? ` (${i.size})` : ""}{i.color ? ` · ${i.color}` : ""}</span>
                 <span className="font-mono">{money.format(i.price_cents * i.qty)}</span>
               </li>
             ))}
