@@ -75,7 +75,11 @@ function ProductPage() {
   const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", slug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("slug", slug).single();
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,name,slug,brand,price_cents,description,sizes,stock,sold_out,images,purchases,has_other_colors,colors")
+        .eq("slug", slug)
+        .single();
       if (error) throw error;
       return data as Product;
     },
