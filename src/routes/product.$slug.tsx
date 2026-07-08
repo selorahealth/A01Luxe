@@ -47,6 +47,8 @@ type Product = {
   sold_out: boolean;
   images: string[];
   purchases: number;
+  has_other_colors: boolean;
+  colors: string[];
 };
 
 type Review = { id: string; name: string; rating: number; comment: string | null; created_at: string };
@@ -120,7 +122,7 @@ function ProductPage() {
             <Icon name="chevron-back-outline" size={16} /> Back
           </Link>
           <div className="mt-4 grid md:grid-cols-2 gap-8">
-            <ImageSlider images={padImages(product.images)} name={product.name} soldOut={product.sold_out || product.stock <= 0} />
+            <ImageSlider images={padImages(product.images)} name={product.name} soldOut={product.sold_out || product.stock <= 0} showThumbs={product.has_other_colors} />
             <BuyPanel product={product} reviews={reviews ?? []} />
           </div>
 
@@ -132,9 +134,10 @@ function ProductPage() {
   );
 }
 
-function ImageSlider({ images, name, soldOut }: { images: string[]; name: string; soldOut: boolean }) {
+function ImageSlider({ images, name, soldOut, showThumbs }: { images: string[]; name: string; soldOut: boolean; showThumbs: boolean }) {
   const [i, setI] = useState(0);
   const [touchX, setTouchX] = useState<number | null>(null);
+  const [zoomed, setZoomed] = useState(false);
   if (images.length === 0) {
     return <div className="aspect-square rounded-3xl bg-muted grid place-items-center text-muted-foreground">No image</div>;
   }
@@ -143,7 +146,8 @@ function ImageSlider({ images, name, soldOut }: { images: string[]; name: string
   return (
     <div>
       <div
-        className="relative aspect-square rounded-3xl overflow-hidden bg-card"
+        className={`group relative aspect-square rounded-3xl overflow-hidden bg-card ${zoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+        onClick={() => setZoomed((v) => !v)}
         onTouchStart={(e) => setTouchX(e.touches[0].clientX)}
         onTouchEnd={(e) => {
           if (touchX == null) return;
@@ -162,7 +166,8 @@ function ImageSlider({ images, name, soldOut }: { images: string[]; name: string
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="h-full w-full object-cover"
+            className={`h-full w-full object-cover transition-transform duration-500 touch-pinch-zoom ${zoomed ? "scale-150" : "scale-100 sm:group-hover:scale-110"}`}
+            draggable={false}
           />
         </AnimatePresence>
         {soldOut && (
@@ -185,17 +190,19 @@ function ImageSlider({ images, name, soldOut }: { images: string[]; name: string
           <Icon name="chevron-forward-outline" size={20} />
         </button>
       </div>
-      <div className="mt-3 grid grid-cols-4 gap-2">
-        {images.map((src, idx) => (
-          <button
-            key={idx}
-            onClick={() => setI(idx)}
-            className={`aspect-square rounded-xl overflow-hidden border-2 ${i === idx ? "border-primary" : "border-transparent"}`}
-          >
-            <img src={src} alt="" className="h-full w-full object-cover" />
-          </button>
-        ))}
-      </div>
+      {showThumbs && images.length > 1 && (
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {images.map((src, idx) => (
+            <button
+              key={idx}
+              onClick={() => setI(idx)}
+              className={`aspect-square rounded-xl overflow-hidden border-2 ${i === idx ? "border-primary" : "border-transparent"}`}
+            >
+              <img src={src} alt="" className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -203,8 +210,11 @@ function ImageSlider({ images, name, soldOut }: { images: string[]; name: string
 function BuyPanel({ product, reviews }: { product: Product; reviews: Review[] }) {
   const cart = useCart();
   const [size, setSize] = useState<string | undefined>(product.sizes[0]);
+  const [color, setColor] = useState<string | undefined>();
   const [qty, setQty] = useState(1);
   const soldOut = product.sold_out || product.stock <= 0;
+  const needsColor = product.has_other_colors && (product.colors?.length ?? 0) > 0;
+  const canAdd = !soldOut && (!needsColor || !!color);
   const rating = derivedRating(product, reviews);
   const description = product.description?.trim() || autoDescription(product);
 
@@ -251,6 +261,26 @@ function BuyPanel({ product, reviews }: { product: Product; reviews: Review[] })
         </div>
       )}
 
+      {needsColor && (
+        <div className="mt-6">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Color</div>
+          <div className="flex flex-wrap gap-2">
+            {product.colors.map((c) => (
+              <button
+                key={c}
+                onClick={() => setColor(c)}
+                className={`min-h-10 px-3 border inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider ${
+                  color === c ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-foreground/40"
+                }`}
+              >
+                <span className="h-4 w-4 border border-current" style={{ backgroundColor: c }} />
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mt-6 flex items-center gap-3">
         <div className="inline-flex items-center rounded-full border border-border">
           <button onClick={() => setQty((v) => Math.max(1, v - 1))} className="h-11 w-11 grid place-items-center">
@@ -265,7 +295,7 @@ function BuyPanel({ product, reviews }: { product: Product; reviews: Review[] })
           </button>
         </div>
         <button
-          disabled={soldOut}
+          disabled={!canAdd}
           onClick={() =>
             cart.add({
               productId: product.id,
@@ -274,14 +304,15 @@ function BuyPanel({ product, reviews }: { product: Product; reviews: Review[] })
               price_cents: product.price_cents,
               image: padImages(product.images)[0] ?? "",
               size,
+              color,
               qty,
               maxStock: product.stock,
             })
           }
           className="btn-primary flex-1 disabled:opacity-60"
         >
-          {soldOut ? "Sold Out" : "Add to Cart"}
-          {!soldOut && <Icon name="bag-add-outline" size={18} />}
+          {soldOut ? "Sold Out" : needsColor && !color ? "Select Color" : "Add to Cart"}
+          {canAdd && <Icon name="bag-add-outline" size={18} />}
         </button>
       </div>
       {/* stock count intentionally hidden from customers */}
