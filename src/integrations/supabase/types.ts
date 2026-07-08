@@ -296,6 +296,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_order_public: {
+        Args: {
+          _customer: Json
+          _items: Json
+          _order_id: string
+          _total_cents: number
+        }
+        Returns: boolean
+      }
       decrement_stock: {
         Args: { _product_id: string; _qty: number }
         Returns: undefined
