@@ -24,7 +24,7 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
 export function Footer() {
   const { data: s } = useSiteSettings();
   const f = s?.footer;
-  const brand = s?.brand ?? "ShoeLuxe";
+  const brand = s?.brand ?? "A01Luxe";
   const socials = f?.socials ?? {};
 
   return (

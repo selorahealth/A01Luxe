@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@/components/site/Icon";
 import { formatMoney, padImages, slugify } from "@/lib/format";
 import { uploadMedia } from "@/lib/upload";
+import { deleteAdminProduct, listAdminProducts, saveAdminProduct } from "@/lib/admin-products.functions";
 
 type Product = {
   id: string;
@@ -22,6 +24,8 @@ type Product = {
   images: string[];
   featured: boolean;
   cc: string | null;
+  has_other_colors: boolean;
+  colors: string[];
 };
 
 type Cat = { id: string; name: string; slug: string };
@@ -29,13 +33,11 @@ type Sub = { id: string; name: string; slug: string; category_id: string; kind: 
 
 export function ProductsTab() {
   const qc = useQueryClient();
+  const listProducts = useServerFn(listAdminProducts);
+  const deleteProduct = useServerFn(deleteAdminProduct);
   const { data: products } = useQuery({
     queryKey: ["admin-products"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as Product[];
-    },
+    queryFn: async () => (await listProducts()) as Product[],
   });
   const { data: cats } = useQuery({
     queryKey: ["admin-cats"],
@@ -62,9 +64,14 @@ export function ProductsTab() {
 
   async function remove(id: string) {
     if (!confirm("Delete this product?")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else toast.success("Deleted");
+    try {
+      await deleteProduct({ data: { id } });
+      toast.success("Deleted");
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+      qc.invalidateQueries({ queryKey: ["products"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Delete failed");
+    }
   }
 
   const target = editing ?? (creating ? emptyProduct() : null);
@@ -156,6 +163,8 @@ function emptyProduct(): Product {
     images: [],
     featured: false,
     cc: "",
+    has_other_colors: false,
+    colors: [],
   };
 }
 
@@ -172,11 +181,15 @@ function ProductDrawer({
 }) {
   const [p, setP] = useState<Product>(product);
   const [busy, setBusy] = useState(false);
+  const saveProduct = useServerFn(saveAdminProduct);
+  const qc = useQueryClient();
   const isNew = !p.id;
 
   async function save() {
     if (!p.name.trim()) return toast.error("Name is required");
     const slug = p.slug?.trim() || slugify(p.name);
+    const colors = uniqueColors(p.colors);
+    if (p.has_other_colors && colors.length === 0) return toast.error("Add at least one color");
     setBusy(true);
     const payload = {
       name: p.name.trim(),
@@ -184,6 +197,7 @@ function ProductDrawer({
       brand: p.brand || null,
       category_id: p.category_id,
       subcategory_id: p.subcategory_id,
+      id: p.id,
       price_cents: Math.max(0, Math.round(Number(p.price_cents) || 0)),
       description: p.description || null,
       sizes: p.sizes,
@@ -192,16 +206,19 @@ function ProductDrawer({
       images: p.images.filter(Boolean).slice(0, 4),
       featured: p.featured,
       cc: p.cc?.trim() || null,
+      has_other_colors: p.has_other_colors,
+      colors: p.has_other_colors ? colors : [],
     };
-    const q = isNew
-      ? supabase.from("products").insert(payload)
-      : supabase.from("products").update(payload).eq("id", p.id);
-    const { error } = await q;
-    setBusy(false);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await saveProduct({ data: payload });
       toast.success(isNew ? "Created" : "Updated");
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+      qc.invalidateQueries({ queryKey: ["products"] });
       onClose();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -230,10 +247,16 @@ function ProductDrawer({
           <TF label="CC — Source store (internal · not shown to customers)" value={p.cc ?? ""} onChange={(v) => setP({ ...p, cc: v })} />
           <TF label="Description" value={p.description ?? ""} onChange={(v) => setP({ ...p, description: v })} textarea />
           <div className="grid grid-cols-2 gap-3">
-            <NF label="Price (cents)" value={p.price_cents} onChange={(v) => setP({ ...p, price_cents: v })} />
+            <PriceField label="Price (₦)" cents={p.price_cents} onChange={(v) => setP({ ...p, price_cents: v })} />
             <NF label="Stock" value={p.stock} onChange={(v) => setP({ ...p, stock: v })} />
           </div>
           <TF label="Sizes (comma separated)" value={p.sizes.join(",")} onChange={(v) => setP({ ...p, sizes: v.split(",").map((s) => s.trim()).filter(Boolean) })} />
+          <ColorEditor
+            enabled={p.has_other_colors}
+            colors={p.colors ?? []}
+            onEnabled={(v) => setP({ ...p, has_other_colors: v, colors: v ? p.colors ?? [] : [] })}
+            onChange={(colors) => setP({ ...p, colors })}
+          />
           <div className="grid grid-cols-2 gap-3">
             <SelectField label="Category" value={p.category_id ?? ""} options={[{ v: "", l: "—" }, ...cats.map((c) => ({ v: c.id, l: c.name }))]} onChange={(v) => setP({ ...p, category_id: v || null, subcategory_id: null })} />
             <SelectField label="Subcategory" value={p.subcategory_id ?? ""} options={[{ v: "", l: "—" }, ...relevantSubs.map((s) => ({ v: s.id, l: s.name }))]} onChange={(v) => setP({ ...p, subcategory_id: v || null })} />
@@ -278,6 +301,83 @@ function NF({ label, value, onChange }: { label: string; value: number; onChange
         onChange={(e) => onChange(Number(e.target.value))}
         className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 outline-none focus:ring-2 ring-primary/30"
       />
+    </div>
+  );
+}
+function PriceField({ label, cents, onChange }: { label: string; cents: number; onChange: (v: number) => void }) {
+  const [value, setValue] = useState(String(Math.round((cents ?? 0) / 100)));
+  useEffect(() => setValue(String(Math.round((cents ?? 0) / 100))), [cents]);
+  function commit(next = value) {
+    const naira = Math.max(0, Math.round(Number(next.replace(/[^\d.]/g, "")) || 0));
+    setValue(naira ? `₦${naira.toLocaleString("en-NG")}` : "");
+    onChange(naira * 100);
+  }
+  return (
+    <div>
+      <label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</label>
+      <input
+        inputMode="numeric"
+        value={value}
+        onFocus={() => setValue(String(Math.round((cents ?? 0) / 100) || ""))}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={() => commit()}
+        className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 outline-none focus:ring-2 ring-primary/30"
+      />
+    </div>
+  );
+}
+
+function uniqueColors(colors: string[]) {
+  return Array.from(new Set((colors ?? []).map((c) => c.trim()).filter(Boolean)));
+}
+
+function ColorEditor({
+  enabled,
+  colors,
+  onEnabled,
+  onChange,
+}: {
+  enabled: boolean;
+  colors: string[];
+  onEnabled: (v: boolean) => void;
+  onChange: (v: string[]) => void;
+}) {
+  const [typed, setTyped] = useState("");
+  const [picked, setPicked] = useState("#D4FF00");
+  function addColor(value: string) {
+    const clean = value.trim();
+    if (!clean) return;
+    onChange(uniqueColors([...(colors ?? []), clean]));
+    setTyped("");
+  }
+  function removeColor(value: string) {
+    onChange((colors ?? []).filter((c) => c !== value));
+  }
+  return (
+    <div className="border border-border p-3 space-y-3">
+      <ToggleRow label="Other colors" value={enabled} onChange={onEnabled} />
+      {enabled && (
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {colors.length === 0 && <span className="text-xs text-muted-foreground">No colors added yet.</span>}
+            {colors.map((c) => (
+              <span key={c} className="inline-flex items-center gap-2 border border-border px-2 py-1 text-xs font-bold uppercase tracking-wider">
+                <span className="h-4 w-4 border border-border" style={{ backgroundColor: c }} />
+                {c}
+                <button type="button" onClick={() => removeColor(c)} className="text-muted-foreground hover:text-destructive" aria-label={`Remove ${c}`}>
+                  <Icon name="close-outline" size={12} />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="grid grid-cols-[48px_1fr_auto] gap-2">
+            <input type="color" value={picked} onChange={(e) => setPicked(e.target.value)} className="h-10 w-12 border border-border bg-background" aria-label="Pick color" />
+            <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Type a color name or #hex" className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none" />
+            <button type="button" onClick={() => addColor(typed || picked)} className="btn-primary text-sm py-2">Add</button>
+          </div>
+          <button type="button" onClick={() => addColor(picked)} className="text-xs uppercase tracking-widest text-primary font-bold">Add picked color</button>
+        </div>
+      )}
     </div>
   );
 }
