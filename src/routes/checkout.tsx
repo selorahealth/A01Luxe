@@ -10,6 +10,8 @@ import { useSiteSettings } from "@/lib/settings";
 import { PageShell } from "@/components/site/PageShell";
 import { Icon } from "@/components/site/Icon";
 
+const initialForm = { name: "", email: "", phone: "", phone2: "", houseNumber: "", streetName: "", landmark: "", zipCode: "", lagos: true };
+
 const schema = z.object({
   name: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(200),
@@ -33,8 +35,6 @@ function getCheckoutError(form: typeof initialForm) {
   if (!missing.length) return null;
   return `Please, fill in your ${missing.join(", ").replace(/, ([^,]*)$/, ", and $1")}.`;
 }
-
-const initialForm = { name: "", email: "", phone: "", phone2: "", houseNumber: "", streetName: "", landmark: "", zipCode: "", lagos: true };
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — A01Luxe" }] }),

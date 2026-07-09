@@ -42,11 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("user_id", userId)
         .order("role", { ascending: true });
       if (data && data.length > 0) {
-        const roles = data.map((r) => r.role);
+        const roleRows = data as unknown as Array<{ role: "admin" | "staff"; permissions?: StaffPermission[] }>;
+        const roles = roleRows.map((r) => r.role);
         setRole(roles.includes("admin") ? "admin" : "staff");
         const all: StaffPermission[] = ["content", "products", "orders", "staffs", "accounts", "notifications"];
         if (roles.includes("admin")) setPermissions(all);
-        else setPermissions(Array.from(new Set(data.flatMap((r) => (r.permissions ?? []) as StaffPermission[]))));
+        else setPermissions(Array.from(new Set(roleRows.flatMap((r) => r.permissions ?? []))));
       } else {
         setRole(null);
         setPermissions([]);

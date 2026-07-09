@@ -2,14 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const permission = "orders";
-
 export const listAdminOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data: allowed, error: permissionError } = await context.supabase.rpc("has_permission", {
       _user_id: context.userId,
-      _permission: permission,
+      _permission: "orders",
     });
     if (permissionError) throw permissionError;
     if (!allowed) throw new Error("You do not have permission to manage orders.");
@@ -35,7 +33,7 @@ export const updateAdminOrderStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: allowed, error: permissionError } = await context.supabase.rpc("has_permission", {
       _user_id: context.userId,
-      _permission: permission,
+      _permission: "orders",
     });
     if (permissionError) throw permissionError;
     if (!allowed) throw new Error("You do not have permission to manage orders.");
@@ -51,7 +49,7 @@ export const deleteAdminOrder = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: allowed, error: permissionError } = await context.supabase.rpc("has_permission", {
       _user_id: context.userId,
-      _permission: permission,
+      _permission: "orders",
     });
     if (permissionError) throw permissionError;
     if (!allowed) throw new Error("You do not have permission to manage orders.");
