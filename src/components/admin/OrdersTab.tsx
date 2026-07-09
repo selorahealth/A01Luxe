@@ -34,7 +34,7 @@ export function OrdersTab() {
   const deleteOrder = useServerFn(deleteAdminOrder);
   const { data: orders } = useQuery({
     queryKey: ["admin-orders"],
-    queryFn: async () => (await listOrders()) as Order[],
+    queryFn: async () => (await listOrders()) as unknown as Order[],
   });
   const [openOrder, setOpenOrder] = useState<Order | null>(null);
 
