@@ -81,7 +81,7 @@ export const listStaff = createServerFn({ method: "GET" })
     if (roles.error) throw roles.error;
     const list = await supabaseAdmin.auth.admin.listUsers();
     if (list.error) throw list.error;
-    return (roles.data ?? []).map((r) => {
+    return ((roles.data ?? []) as Array<{ user_id: string; role: "admin" | "staff"; permissions?: string[]; created_at: string }>).map((r) => {
       const u = list.data.users.find((x) => x.id === r.user_id);
       return {
         userId: r.user_id,
