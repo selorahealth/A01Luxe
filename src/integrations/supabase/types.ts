@@ -274,18 +274,21 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          permissions: string[]
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          permissions?: string[]
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          permissions?: string[]
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
@@ -308,6 +311,10 @@ export type Database = {
       decrement_stock: {
         Args: { _product_id: string; _qty: number }
         Returns: undefined
+      }
+      has_permission: {
+        Args: { _permission: string; _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
