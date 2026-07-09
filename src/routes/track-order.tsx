@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { formatMoney } from "@/lib/format";
+import { useMoney } from "@/lib/currency";
 import { PageShell } from "@/components/site/PageShell";
 import { Icon } from "@/components/site/Icon";
 
@@ -28,6 +28,7 @@ function Track() {
   const [order, setOrder] = useState<OrderRow | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const money = useMoney();
 
   async function lookup(orderId: string) {
     setErr(null); setOrder(null); setBusy(true);
@@ -75,7 +76,7 @@ function Track() {
               </div>
               <div className="text-right">
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Total</div>
-                <div className="font-mono font-bold">{formatMoney(order.total_cents)}</div>
+                <div className="font-mono font-bold">{money.format(order.total_cents)}</div>
               </div>
             </div>
 

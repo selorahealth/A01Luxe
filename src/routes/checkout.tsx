@@ -15,9 +15,26 @@ const schema = z.object({
   email: z.string().trim().email().max(200),
   phone: z.string().trim().min(5).max(30),
   phone2: z.string().trim().max(30).optional().or(z.literal("")),
-  address: z.string().trim().min(5).max(500),
+  houseNumber: z.string().trim().min(1).max(80),
+  streetName: z.string().trim().min(2).max(160),
+  landmark: z.string().trim().min(2).max(160),
+  zipCode: z.string().trim().max(20).optional().or(z.literal("")),
   lagos: z.boolean(),
 });
+
+function getCheckoutError(form: typeof initialForm) {
+  const missing = [];
+  if (form.name.trim().length < 2) missing.push("name");
+  if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) missing.push("email");
+  if (form.phone.trim().length < 5) missing.push("phone number");
+  if (!form.houseNumber.trim()) missing.push("house number");
+  if (form.streetName.trim().length < 2) missing.push("street name");
+  if (form.landmark.trim().length < 2) missing.push("popular landmark/bustop");
+  if (!missing.length) return null;
+  return `Please, fill in your ${missing.join(", ").replace(/, ([^,]*)$/, ", and $1")}.`;
+}
+
+const initialForm = { name: "", email: "", phone: "", phone2: "", houseNumber: "", streetName: "", landmark: "", zipCode: "", lagos: true };
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — A01Luxe" }] }),
@@ -29,7 +46,7 @@ function Checkout() {
   const navigate = useNavigate();
   const money = useMoney();
   const { data: settings } = useSiteSettings();
-  const [form, setForm] = useState({ name: "", email: "", phone: "", phone2: "", address: "", lagos: true });
+  const [form, setForm] = useState(initialForm);
   const [err, setErr] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -42,7 +59,7 @@ function Checkout() {
     e.preventDefault();
     setErr(null);
     const parsed = schema.safeParse(form);
-    if (!parsed.success) return setErr(parsed.error.errors[0].message);
+    if (!parsed.success) return setErr(getCheckoutError(form) ?? "Please check your checkout details.");
     if (cart.items.length === 0) return setErr("Your cart is empty.");
     setSubmitting(true);
     try {
@@ -52,10 +69,17 @@ function Checkout() {
         size: i.size ?? null, color: i.color ?? null, qty: i.qty, price_cents: i.price_cents,
       }));
       const total = grandTotal;
+      const address = [
+        `House number: ${parsed.data.houseNumber}`,
+        `Street: ${parsed.data.streetName}`,
+        `Landmark/Bustop: ${parsed.data.landmark}`,
+        parsed.data.zipCode ? `Zip code: ${parsed.data.zipCode}` : null,
+      ].filter(Boolean).join("\n");
       const { data, error } = await supabase.rpc("create_order_public", {
         _order_id: orderId,
         _customer: {
           ...parsed.data,
+          address,
           delivery_zone: form.lagos ? "lagos" : "outside",
           delivery_fee_cents: deliveryFee,
           subtotal_cents: cart.totalCents,
@@ -90,9 +114,9 @@ function Checkout() {
         <form onSubmit={submit} className="border border-border p-6 space-y-4">
           <h2 className="font-display uppercase font-bold text-xl">Delivery Details</h2>
           {([
-            { k: "name", label: "Full name", type: "text" },
-            { k: "email", label: "Email", type: "email" },
-            { k: "phone", label: "Phone", type: "tel" },
+            { k: "name", label: "Full name *", type: "text" },
+            { k: "email", label: "Email *", type: "email" },
+            { k: "phone", label: "Phone *", type: "tel" },
             { k: "phone2", label: "Secondary phone (optional)", type: "tel" },
           ] as const).map((f) => (
             <div key={f.k}>
@@ -102,11 +126,18 @@ function Checkout() {
                 className="mt-1 w-full border border-border bg-card px-3 py-2 outline-none focus:border-primary" />
             </div>
           ))}
-          <div>
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Location</label>
-            <textarea rows={3} value={form.address}
-              onChange={(e) => setForm((s) => ({ ...s, address: e.target.value }))}
-              className="mt-1 w-full border border-border bg-card px-3 py-2 outline-none focus:border-primary" />
+          <div className="grid sm:grid-cols-2 gap-3">
+            {([
+              { k: "houseNumber", label: "House number *" },
+              { k: "streetName", label: "Street name *" },
+              { k: "landmark", label: "Popular landmark/bustop *" },
+              { k: "zipCode", label: "Zip code (optional)" },
+            ] as const).map((f) => (
+              <div key={f.k}>
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{f.label}</label>
+                <input value={form[f.k]} onChange={(e) => setForm((s) => ({ ...s, [f.k]: e.target.value }))} className="mt-1 w-full border border-border bg-card px-3 py-2 outline-none focus:border-primary" />
+              </div>
+            ))}
           </div>
           <div className="border border-border p-3 space-y-2">
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Delivery zone</div>

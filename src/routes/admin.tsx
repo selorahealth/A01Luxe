@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import type { StaffPermission } from "@/lib/auth";
@@ -54,6 +54,15 @@ function AdminPage() {
     };
   }, [session]);
 
+  const visibleTabs = useMemo(
+    () => TABS.filter((t) => role === "admin" || (!t.adminOnly && permissions.includes(t.id))),
+    [permissions, role],
+  );
+
+  useEffect(() => {
+    if (visibleTabs.length > 0 && !visibleTabs.some((t) => t.id === tab)) setTab(visibleTabs[0].id);
+  }, [tab, visibleTabs]);
+
   if (loading || !session) {
     return <div className="min-h-screen grid place-items-center">Loading…</div>;
   }
@@ -72,12 +81,6 @@ function AdminPage() {
       </div>
     );
   }
-
-  const visibleTabs = TABS.filter((t) => role === "admin" || (!t.adminOnly && permissions.includes(t.id)));
-
-  useEffect(() => {
-    if (visibleTabs.length > 0 && !visibleTabs.some((t) => t.id === tab)) setTab(visibleTabs[0].id);
-  }, [permissions, role, tab, visibleTabs]);
 
   return (
     <div className="min-h-screen bg-background flex">
