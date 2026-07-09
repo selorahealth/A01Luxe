@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@/components/site/Icon";
 import { formatMoney } from "@/lib/format";
 import { toast } from "sonner";
+import { deleteAdminOrder, listAdminOrders, updateAdminOrderStatus } from "@/lib/admin-orders.functions";
 
 type Order = {
   id: string;
@@ -16,7 +18,7 @@ type Order = {
   created_at: string;
 };
 
-const STATUSES = ["pending", "paid", "shipped", "delivered", "cancelled"];
+const STATUSES = ["pending", "paid", "processing", "shipped", "delivered", "cancelled"];
 const STATUS_COLOR: Record<string, string> = {
   pending: "bg-yellow-500/15 text-yellow-800 border-yellow-500/30",
   paid: "bg-primary/15 text-primary border-primary/30",
@@ -27,13 +29,12 @@ const STATUS_COLOR: Record<string, string> = {
 
 export function OrdersTab() {
   const qc = useQueryClient();
+  const listOrders = useServerFn(listAdminOrders);
+  const updateOrderStatus = useServerFn(updateAdminOrderStatus);
+  const deleteOrder = useServerFn(deleteAdminOrder);
   const { data: orders } = useQuery({
     queryKey: ["admin-orders"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as unknown as Order[];
-    },
+    queryFn: async () => (await listOrders()) as Order[],
   });
   const [openOrder, setOpenOrder] = useState<Order | null>(null);
 
@@ -50,9 +51,26 @@ export function OrdersTab() {
   }, [qc]);
 
   async function updateStatus(id: string, status: string) {
-    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-    if (error) toast.error(error.message);
-    else toast.success(`Status set to ${status}`);
+    try {
+      await updateOrderStatus({ data: { id, status: status as never } });
+      toast.success(`Status set to ${status}`);
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Status update failed");
+    }
+  }
+
+  async function removeOrder(id: string) {
+    if (!confirm("Delete this order permanently?")) return;
+    try {
+      await deleteOrder({ data: { id } });
+      toast.success("Order deleted");
+      setOpenOrder(null);
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      qc.invalidateQueries({ queryKey: ["accounts-orders"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Delete failed");
+    }
   }
 
   return (
@@ -100,6 +118,7 @@ export function OrdersTab() {
             order={openOrder}
             onClose={() => setOpenOrder(null)}
             onStatus={(s) => updateStatus(openOrder.id, s)}
+            onDelete={() => removeOrder(openOrder.id)}
           />
         )}
       </AnimatePresence>
@@ -107,7 +126,7 @@ export function OrdersTab() {
   );
 }
 
-function OrderModal({ order, onClose, onStatus }: { order: Order; onClose: () => void; onStatus: (s: string) => void }) {
+function OrderModal({ order, onClose, onStatus, onDelete }: { order: Order; onClose: () => void; onStatus: (s: string) => void; onDelete: () => void }) {
   const productIds = useMemo(
     () => Array.from(new Set((order.items ?? []).map((i) => i.product_id).filter(Boolean))),
     [order],
@@ -205,6 +224,9 @@ function OrderModal({ order, onClose, onStatus }: { order: Order; onClose: () =>
             ))}
           </div>
         </div>
+        <button onClick={onDelete} className="mt-5 w-full border border-destructive text-destructive px-4 py-2 text-sm font-bold uppercase hover:bg-destructive/10 inline-flex items-center justify-center gap-2">
+          <Icon name="trash-outline" size={16} /> Delete order
+        </button>
       </motion.div>
     </>
   );
