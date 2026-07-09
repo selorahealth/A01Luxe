@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
+import type { StaffPermission } from "@/lib/auth";
 import { Icon } from "@/components/site/Icon";
 import { SiteContentTab } from "@/components/admin/SiteContentTab";
 import { ProductsTab } from "@/components/admin/ProductsTab";
@@ -17,19 +18,19 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type TabId = "content" | "products" | "orders" | "staffs" | "accounts" | "notifications";
+type TabId = StaffPermission;
 
 const TABS: { id: TabId; label: string; icon: string; adminOnly?: boolean }[] = [
   { id: "content", label: "Site Content", icon: "color-palette-outline" },
   { id: "products", label: "Products", icon: "cube-outline" },
   { id: "orders", label: "Orders", icon: "receipt-outline" },
-  { id: "staffs", label: "Staffs", icon: "people-outline" },
-  { id: "accounts", label: "Accounts", icon: "cash-outline", adminOnly: true },
+  { id: "staffs", label: "Staffs", icon: "people-outline", adminOnly: true },
+  { id: "accounts", label: "Accounts", icon: "cash-outline" },
   { id: "notifications", label: "Notifications", icon: "notifications-outline" },
 ];
 
 function AdminPage() {
-  const { session, role, loading, signOut } = useAuth();
+  const { session, role, permissions, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: settings } = useSiteSettings();
   const [tab, setTab] = useState<TabId>("content");
@@ -53,6 +54,15 @@ function AdminPage() {
     };
   }, [session]);
 
+  const visibleTabs = useMemo(
+    () => TABS.filter((t) => role === "admin" || (!t.adminOnly && permissions.includes(t.id))),
+    [permissions, role],
+  );
+
+  useEffect(() => {
+    if (visibleTabs.length > 0 && !visibleTabs.some((t) => t.id === tab)) setTab(visibleTabs[0].id);
+  }, [tab, visibleTabs]);
+
   if (loading || !session) {
     return <div className="min-h-screen grid place-items-center">Loading…</div>;
   }
@@ -71,8 +81,6 @@ function AdminPage() {
       </div>
     );
   }
-
-  const visibleTabs = TABS.filter((t) => !(t.adminOnly && role !== "admin"));
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -94,8 +102,8 @@ function AdminPage() {
         } lg:translate-x-0 flex flex-col`}
       >
         <div className="p-5 border-b border-border flex items-center gap-2">
-          <div className="h-9 w-9 rounded-full bg-primary text-primary-foreground grid place-items-center font-display font-bold">
-            {(settings?.brand ?? "S").charAt(0)}
+          <div className="h-9 w-9 rounded-full bg-primary text-primary-foreground grid place-items-center font-display font-bold overflow-hidden">
+            {settings?.logo_url ? <img src={settings.logo_url} alt={settings?.brand ?? "A01Luxe"} className="h-full w-full object-cover" /> : (settings?.brand ?? "A01Luxe").charAt(0)}
           </div>
           <div className="min-w-0">
             <div className="font-display font-bold truncate">{settings?.brand ?? "Admin"}</div>
@@ -159,7 +167,7 @@ function AdminPage() {
           {tab === "products" && <ProductsTab />}
           {tab === "orders" && <OrdersTab />}
           {tab === "staffs" && <StaffsTab currentRole={role} />}
-          {tab === "accounts" && role === "admin" && <AccountsTab />}
+          {tab === "accounts" && <AccountsTab />}
           {tab === "notifications" && <NotificationsTab />}
         </main>
       </div>

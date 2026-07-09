@@ -37,7 +37,7 @@ export function ProductsTab() {
   const deleteProduct = useServerFn(deleteAdminProduct);
   const { data: products } = useQuery({
     queryKey: ["admin-products"],
-    queryFn: async () => (await listProducts()) as Product[],
+    queryFn: async () => (await listProducts()) as unknown as Product[],
   });
   const { data: cats } = useQuery({
     queryKey: ["admin-cats"],

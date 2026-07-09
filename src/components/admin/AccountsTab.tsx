@@ -1,23 +1,24 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { formatMoney } from "@/lib/format";
 import { Icon } from "@/components/site/Icon";
+import { deleteAdminOrder, listAdminOrders } from "@/lib/admin-orders.functions";
+import { toast } from "sonner";
 
 type Order = { id: string; order_id: string; total_cents: number; status: string; created_at: string; customer: { name?: string; email?: string } };
 
 export function AccountsTab() {
+  const qc = useQueryClient();
+  const listOrders = useServerFn(listAdminOrders);
+  const deleteOrder = useServerFn(deleteAdminOrder);
   const { data: orders } = useQuery({
     queryKey: ["accounts-orders"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("orders").select("id,order_id,total_cents,status,created_at,customer").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as unknown as Order[];
-    },
+    queryFn: async () => (await listOrders()) as unknown as Order[],
   });
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -75,6 +76,18 @@ export function AccountsTab() {
     URL.revokeObjectURL(url);
   }
 
+  async function remove(id: string) {
+    if (!confirm("Delete this account entry/order permanently?")) return;
+    try {
+      await deleteOrder({ data: { id } });
+      toast.success("Entry deleted");
+      qc.invalidateQueries({ queryKey: ["accounts-orders"] });
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Delete failed");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="grid sm:grid-cols-3 gap-3">
@@ -106,6 +119,7 @@ export function AccountsTab() {
               <th className="text-left p-3">Status</th>
               <th className="text-right p-3">Total</th>
               <th className="text-right p-3">Date</th>
+              <th className="text-right p-3">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -116,6 +130,7 @@ export function AccountsTab() {
                 <td className="p-3">{o.status}</td>
                 <td className="p-3 text-right font-medium">{formatMoney(o.total_cents)}</td>
                 <td className="p-3 text-right text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</td>
+                <td className="p-3 text-right"><button onClick={() => remove(o.id)} className="text-destructive hover:bg-destructive/10 h-8 w-8 inline-grid place-items-center" aria-label="Delete entry"><Icon name="trash-outline" size={15} /></button></td>
               </tr>
             ))}
           </tbody>

@@ -39,6 +39,16 @@ import {
   Music2,
   Receipt,
   ShoppingBasket,
+  KeyRound,
+  Users,
+  Palette,
+  CreditCard,
+  Megaphone,
+  Images,
+  Sparkles,
+  Save,
+  Download,
+  DollarSign,
   type LucideIcon,
 } from "lucide-react";
 
@@ -86,6 +96,17 @@ const MAP: Record<string, LucideIcon> = {
   "receipt-outline": Receipt,
   "document-text-outline": Receipt,
   "basket-outline": ShoppingBasket,
+  "key-outline": KeyRound,
+  "people-outline": Users,
+  "color-palette-outline": Palette,
+  "card-outline": CreditCard,
+  "megaphone-outline": Megaphone,
+  "images-outline": Images,
+  "sparkles-outline": Sparkles,
+  "save-outline": Save,
+  "download-outline": Download,
+  "cash-outline": DollarSign,
+  "person-outline": User,
 };
 
 // Premium, elegant tote / handbag icon rendered inline as an SVG.

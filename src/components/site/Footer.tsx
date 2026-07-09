@@ -33,8 +33,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-[1.4fr_repeat(3,1fr)] gap-10">
           <div>
             <div className="flex items-center gap-2">
-              <div className="h-9 w-9 bg-primary text-primary-foreground grid place-items-center font-display font-black">
-                {brand.charAt(0)}
+              <div className="h-9 w-9 bg-primary text-primary-foreground grid place-items-center font-display font-black overflow-hidden">
+                {s?.logo_url ? <img src={s.logo_url} alt={brand} className="h-full w-full object-cover" /> : brand.charAt(0)}
               </div>
               <span className="font-display text-2xl font-black uppercase tracking-tight">
                 {brand}
@@ -43,10 +43,10 @@ export function Footer() {
             <p className="mt-3 text-sm text-muted-foreground max-w-sm">
               {s?.tagline ?? "Curated branded and unbranded high-quality sneakers."}
             </p>
-            <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-              {f?.address && <p>{f.address}</p>}
-              {f?.phone && <p>{f.phone}</p>}
-              {f?.email && <p>{f.email}</p>}
+            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+              {f?.address && <p className="flex items-center gap-2"><Icon name="location-outline" size={16} /> <span>{f.address}</span></p>}
+              {f?.phone && <p className="flex items-center gap-2"><Icon name="call-outline" size={16} /> <span>{f.phone}</span></p>}
+              {f?.email && <p className="flex items-center gap-2"><Icon name="mail-outline" size={16} /> <span>{f.email}</span></p>}
             </div>
             <div className="flex gap-2 mt-4">
               {socials.instagram && (

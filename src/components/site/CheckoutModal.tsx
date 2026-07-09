@@ -9,11 +9,20 @@ import { Icon } from "./Icon";
 import { PaymentModal } from "./PaymentModal";
 
 const schema = z.object({
-  name: z.string().trim().min(2).max(80),
-  email: z.string().trim().email().max(200),
-  phone: z.string().trim().min(5).max(30),
-  address: z.string().trim().min(5).max(500),
+  name: z.string().trim().min(2, "name").max(80),
+  email: z.string().trim().email("email").max(200),
+  phone: z.string().trim().min(5, "phone number").max(30),
+  address: z.string().trim().min(5, "delivery location").max(500),
 });
+
+function checkoutError(form: { name: string; email: string; phone: string; address: string }) {
+  const missing = [];
+  if (form.name.trim().length < 2) missing.push("name");
+  if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) missing.push("email");
+  if (form.phone.trim().length < 5) missing.push("phone number");
+  if (form.address.trim().length < 5) missing.push("delivery location");
+  return missing.length ? `Please, fill in your ${missing.join(", ").replace(/, ([^,]*)$/, ", and $1")}.` : null;
+}
 
 export function CheckoutModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const cart = useCart();
@@ -28,7 +37,7 @@ export function CheckoutModal({ open, onClose }: { open: boolean; onClose: () =>
     setErr(null);
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
-      setErr(parsed.error.errors[0].message);
+      setErr(checkoutError(form) ?? "Please check your checkout details.");
       return;
     }
     setSubmitting(true);
@@ -104,7 +113,7 @@ export function CheckoutModal({ open, onClose }: { open: boolean; onClose: () =>
                 {(["name", "email", "phone", "address"] as const).map((k) => (
                   <div key={k}>
                     <label className="text-xs uppercase tracking-wider text-muted-foreground">
-                      {k === "address" ? "Location" : k}
+                      {k === "address" ? "Location" : k} <span className="text-primary">*</span>
                     </label>
                     {k === "address" ? (
                       <textarea

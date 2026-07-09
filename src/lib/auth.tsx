@@ -3,11 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 
 type Role = "admin" | "staff" | null;
+export type StaffPermission = "content" | "products" | "orders" | "staffs" | "accounts" | "notifications";
 
 type AuthCtx = {
   session: Session | null;
   user: User | null;
   role: Role;
+  permissions: StaffPermission[];
   loading: boolean;
   signOut: () => Promise<void>;
 };
@@ -17,13 +19,14 @@ const Ctx = createContext<AuthCtx | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role>(null);
+  const [permissions, setPermissions] = useState<StaffPermission[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       if (s?.user) void loadRole(s.user.id);
-      else setRole(null);
+      else { setRole(null); setPermissions([]); }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -35,14 +38,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function loadRole(userId: string) {
       const { data } = await supabase
         .from("user_roles")
-        .select("role")
+        .select("role, permissions")
         .eq("user_id", userId)
         .order("role", { ascending: true });
       if (data && data.length > 0) {
-        const roles = data.map((r) => r.role);
+        const roleRows = data as unknown as Array<{ role: "admin" | "staff"; permissions?: StaffPermission[] }>;
+        const roles = roleRows.map((r) => r.role);
         setRole(roles.includes("admin") ? "admin" : "staff");
+        const all: StaffPermission[] = ["content", "products", "orders", "staffs", "accounts", "notifications"];
+        if (roles.includes("admin")) setPermissions(all);
+        else setPermissions(Array.from(new Set(roleRows.flatMap((r) => r.permissions ?? []))));
       } else {
         setRole(null);
+        setPermissions([]);
       }
     }
   }, []);
@@ -53,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         user: session?.user ?? null,
         role,
+        permissions,
         loading,
         signOut: async () => {
           await supabase.auth.signOut();

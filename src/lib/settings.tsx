@@ -67,14 +67,65 @@ export type SiteSettings = {
 
 export const settingsQueryKey = ["site_settings"] as const;
 
+export const defaultSiteSettings: SiteSettings = {
+  id: 1,
+  brand: "A01Luxe",
+  tagline: "Curated footwear, elevated.",
+  logo_url: "/A01Luxe-pfp.png",
+  nav_layout: { logoPosition: "left", showCategories: true, showUserIcon: true, showCart: true },
+  hero: {
+    headline: "A01Luxe",
+    subheadline: "Curated branded and unbranded high-quality sneakers.",
+    ctaPrimary: "Shop the drop",
+    ctaSecondary: "Track order",
+    mediaUrl: "/hero-video.mp4",
+    mediaType: "video",
+    overlay: 0.45,
+  },
+  cta: { heading: "Join the next drop", sub: "Fresh pairs, sharp curation, fast support.", button: "Shop now", mediaUrl: "/e.png" },
+  footer: {
+    about: "Curated footwear for precise everyday movement.",
+    address: "Lagos. Abuja. Ibadan",
+    phone: "+234 902 601 6812",
+    email: "care.a01luxe@gmail.com",
+    socials: { instagram: "", tiktok: "", facebook: "", whatsappChannel: "" },
+    columns: [
+      { title: "Quick Links", links: [{ label: "Shop", href: "/shop" }, { label: "About A01Luxe", href: "/about" }, { label: "Contact", href: "/contact" }] },
+      { title: "Customer Care", links: [{ label: "FAQ", href: "/faq" }, { label: "Shipping & Returns", href: "/shipping-returns" }, { label: "Track Order", href: "/track-order" }, { label: "Care Instructions", href: "/care" }, { label: "Size Guide", href: "/size-guide" }] },
+    ],
+    copyright: "Copyright (c) 2026 A01Luxe. All rights reserved.",
+  },
+  theme: { background: "#212121", foreground: "#F4EEE8", card: "#2A2A2A", primary: "#D4FF00", accent: "#D4FF00" },
+  payment: { bankName: "", accountName: "", accountNumber: "", whatsappNumber: "", instructions: "Transfer the exact amount using your Order ID as the reference, then upload your receipt." },
+  currency: { symbol: "₦", code: "NGN" },
+};
+
+function normalizeSiteSettings(data: SiteSettings): SiteSettings {
+  const brand = !data.brand || /shoeluxe/i.test(data.brand) ? "A01Luxe" : data.brand;
+  return {
+    ...defaultSiteSettings,
+    ...data,
+    brand,
+    logo_url: data.logo_url || defaultSiteSettings.logo_url,
+    tagline: data.tagline || defaultSiteSettings.tagline,
+    nav_layout: { ...defaultSiteSettings.nav_layout, ...(data.nav_layout ?? {}) },
+    hero: { ...defaultSiteSettings.hero, ...(data.hero ?? {}) },
+    cta: { ...defaultSiteSettings.cta, ...(data.cta ?? {}) },
+    footer: { ...defaultSiteSettings.footer, ...(data.footer ?? {}), socials: { ...defaultSiteSettings.footer.socials, ...(data.footer?.socials ?? {}) } },
+    theme: { ...defaultSiteSettings.theme, ...(data.theme ?? {}) },
+    payment: { ...defaultSiteSettings.payment, ...(data.payment ?? {}) },
+    currency: { ...defaultSiteSettings.currency, ...(data.currency ?? {}) },
+  };
+}
+
 export async function fetchSiteSettings(): Promise<SiteSettings> {
   const { data, error } = await supabase.from("site_settings").select("*").eq("id", 1).single();
-  if (error) throw error;
-  return data as unknown as SiteSettings;
+  if (error) return defaultSiteSettings;
+  return normalizeSiteSettings(data as unknown as SiteSettings);
 }
 
 export function useSiteSettings() {
-  return useQuery({ queryKey: settingsQueryKey, queryFn: fetchSiteSettings, staleTime: 0, refetchOnWindowFocus: true, refetchOnMount: true });
+  return useQuery({ queryKey: settingsQueryKey, queryFn: fetchSiteSettings, initialData: defaultSiteSettings, staleTime: 0, refetchOnWindowFocus: true, refetchOnMount: true });
 }
 
 export function applyThemeToDocument(theme: ThemeSettings) {

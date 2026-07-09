@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const listAdminProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: allowed } = await context.supabase.rpc("is_staff_or_admin", { _user_id: context.userId });
+    const { data: allowed } = await context.supabase.rpc("has_permission", { _user_id: context.userId, _permission: "products" });
     if (!allowed) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
@@ -41,7 +41,7 @@ export const saveAdminProduct = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const { data: allowed } = await context.supabase.rpc("is_staff_or_admin", { _user_id: context.userId });
+    const { data: allowed } = await context.supabase.rpc("has_permission", { _user_id: context.userId, _permission: "products" });
     if (!allowed) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const payload = {
@@ -72,7 +72,7 @@ export const deleteAdminProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { data: allowed } = await context.supabase.rpc("is_staff_or_admin", { _user_id: context.userId });
+    const { data: allowed } = await context.supabase.rpc("has_permission", { _user_id: context.userId, _permission: "products" });
     if (!allowed) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("products").delete().eq("id", data.id);

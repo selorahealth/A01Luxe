@@ -1,0 +1,60 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+export const listAdminOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: allowed, error: permissionError } = await context.supabase.rpc("has_permission", {
+      _user_id: context.userId,
+      _permission: "orders",
+    });
+    if (permissionError) throw permissionError;
+    if (!allowed) throw new Error("You do not have permission to manage orders.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  });
+
+export const updateAdminOrderStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["pending", "paid", "processing", "shipped", "delivered", "cancelled"]),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: allowed, error: permissionError } = await context.supabase.rpc("has_permission", {
+      _user_id: context.userId,
+      _permission: "orders",
+    });
+    if (permissionError) throw permissionError;
+    if (!allowed) throw new Error("You do not have permission to manage orders.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("orders").update({ status: data.status }).eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const deleteAdminOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: allowed, error: permissionError } = await context.supabase.rpc("has_permission", {
+      _user_id: context.userId,
+      _permission: "orders",
+    });
+    if (permissionError) throw permissionError;
+    if (!allowed) throw new Error("You do not have permission to manage orders.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("orders").delete().eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
