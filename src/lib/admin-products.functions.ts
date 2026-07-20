@@ -21,7 +21,7 @@ export const saveAdminProduct = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     z
       .object({
-        id: z.string().uuid().optional().or(z.literal("")),
+        id: z.union([   z.string().uuid(),   z.literal(""),   z.null(),   z.undefined() ]).optional(),
         name: z.string().trim().min(1),
         slug: z.string().trim().min(1),
         brand: z.string().nullable(),
