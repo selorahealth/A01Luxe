@@ -64,7 +64,7 @@ function AdminPage() {
   }, [tab, visibleTabs]);
 
   if (loading || !session) {
-    return <div className="min-h-screen grid place-items-center">Loading…</div>;
+    return <div className="min-h-screen grid place-items-center">Your Admin Dashboard is Loading. . .</div>;
   }
   if (!role) {
     return (
