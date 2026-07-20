@@ -102,7 +102,7 @@ function AdminPage() {
         } lg:translate-x-0 flex flex-col`}
       >
         <div className="p-5 border-b border-border flex items-center gap-2">
-          <div className="h-9 w-9 rounded-full bg-primary text-primary-foreground grid place-items-center font-display font-bold overflow-hidden">
+          <div className="h-9 w-9 grid place-items-center overflow-hidden">
             {settings?.logo_url ? <img src={settings.logo_url} alt={settings?.brand ?? "A01Luxe"} className="h-full w-full object-cover" /> : (settings?.brand ?? "A01Luxe").charAt(0)}
           </div>
           <div className="min-w-0">
