@@ -33,7 +33,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-[1.4fr_repeat(3,1fr)] gap-10">
           <div>
             <div className="flex items-center gap-2">
-              <div className="h-9 w-9 bg-primary text-primary-foreground grid place-items-center font-display font-black overflow-hidden">
+              <div className="h-9 w-9 grid place-items-center overflow-hidden">
                 {s?.logo_url ? <img src={s.logo_url} alt={brand} className="h-full w-full object-cover" /> : brand.charAt(0)}
               </div>
               <span className="font-display text-2xl font-black uppercase tracking-tight">
