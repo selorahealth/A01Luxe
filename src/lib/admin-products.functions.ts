@@ -70,8 +70,14 @@ export const saveAdminProduct = createServerFn({ method: "POST" })
 
 export const deleteAdminProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
-  .handler(async ({ data, context }) => {
+  .inputValidator((data) =>
+    z
+      .object({
+        id: z.string().uuid("Invalid product ID"),
+      })
+      .parse(data)
+  )
+   .handler(async ({ data, context }) => {
     const { data: allowed } = await context.supabase.rpc("has_permission", { _user_id: context.userId, _permission: "products" });
     if (!allowed) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
