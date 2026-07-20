@@ -25,7 +25,7 @@ function Shop() {
   const { category, sub } = Route.useSearch();
   return (
     <PageShell title="Shop" eyebrow="// The Full Catalog">
-      <ProductsSection categorySlug={category} subSlug={sub} title="All Sneakers" eyebrow="" />
+      <ProductsSection categorySlug={category} subSlug={sub} title="The Full Catalog" eyebrow="" />
     </PageShell>
   );
 }
