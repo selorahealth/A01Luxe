@@ -75,7 +75,7 @@ export function Hero() {
           </a>
           {hero?.ctaSecondary && (
             <a
-              href="/shop"
+              href="/track-order"
               className={`inline-flex items-center gap-2 rounded-full px-5 py-3 font-medium border transition-colors ${
                 hero?.mediaUrl
                   ? "border-white/60 text-white hover:bg-white/10"
