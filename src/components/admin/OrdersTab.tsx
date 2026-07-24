@@ -52,7 +52,7 @@ export function OrdersTab() {
 
   async function updateStatus(id: string, status: string) {
     try {
-      await updateOrderStatus({ data: { id, status: status as never } });
+      await updateOrderStatus({ data: { id: openOrder?.order_id || id, status: status as never } });
       toast.success(`Status set to ${status}`);
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
     } catch (e) {
@@ -60,10 +60,10 @@ export function OrdersTab() {
     }
   }
 
-  async function removeOrder(id: string) {
+  async function removeOrder(orderId: string) {
     if (!confirm("Delete this order permanently?")) return;
     try {
-      await deleteOrder({ data: { id } });
+      await deleteOrder({ data: { id: orderId } });
       toast.success("Order deleted");
       setOpenOrder(null);
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
@@ -102,7 +102,7 @@ export function OrdersTab() {
                 {o.customer?.name} <span className="text-muted-foreground">· {o.items?.length ?? 0} items</span>
               </div>
               <div className="text-xs text-muted-foreground">
-                {new Date(o.created_at).toLocaleString()}
+                {o.created_at ? new Date(o.created_at).toLocaleString() : 'N/A'}
               </div>
             </div>
             <div className="text-right shrink-0">
@@ -117,8 +117,8 @@ export function OrdersTab() {
           <OrderModal
             order={openOrder}
             onClose={() => setOpenOrder(null)}
-            onStatus={(s) => updateStatus(openOrder.id, s)}
-            onDelete={() => removeOrder(openOrder.id)}
+            onStatus={(s) => updateStatus(openOrder.order_id, s)}
+            onDelete={() => removeOrder(openOrder.order_id)}
           />
         )}
       </AnimatePresence>
@@ -159,7 +159,7 @@ function OrderModal({ order, onClose, onStatus, onDelete }: { order: Order; onCl
           <div>
             <h3 className="font-display text-xl font-bold">Order {order.order_id}</h3>
             <p className="text-xs text-muted-foreground">
-              {new Date(order.created_at).toLocaleString()}
+              {o.created_at ? new Date(o.created_at).toLocaleString() : 'N/A'}
             </p>
           </div>
           <button onClick={onClose} className="h-9 w-9 grid place-items-center rounded-full hover:bg-foreground/5">
