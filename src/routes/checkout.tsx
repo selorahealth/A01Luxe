@@ -102,7 +102,7 @@ function Checkout() {
       <PageShell title="Checkout" eyebrow="// Almost there">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 text-center border border-dashed border-border">
           <p className="text-muted-foreground">Your cart is empty.</p>
-          <Link to="/shop" className="btn-primary mt-6 inline-flex">Browse sneakers <Icon name="arrow-forward-outline" size={18} /></Link>
+          <Link to="/shop" className="btn-primary mt-6 inline-flex">Browse Our Collection <Icon name="arrow-forward-outline" size={18} /></Link>
         </div>
       </PageShell>
     );
