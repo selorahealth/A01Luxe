@@ -58,7 +58,7 @@ function Track() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-8">
         <form onSubmit={submit} className="flex gap-2 border border-border p-2">
           <input value={input} onChange={(e) => setInput(e.target.value)}
-            placeholder="e.g. A01L-XXXXX"
+            placeholder="Enter Tracking Number: A01L-XXXXX"
             className="flex-1 bg-transparent px-3 py-3 outline-none uppercase font-mono" />
           <button className="btn-primary" disabled={busy || !input.trim()}>
             {busy ? "Looking…" : "Track"}
