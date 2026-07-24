@@ -129,7 +129,9 @@ export function AccountsTab() {
                 <td className="p-3">{o.customer?.name}</td>
                 <td className="p-3">{o.status}</td>
                 <td className="p-3 text-right font-medium">{formatMoney(o.total_cents)}</td>
-                <td className="p-3 text-right text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</td>
+                <td className="p-3 text-right text-muted-foreground">{o.created_at 
+    ? new Date(o.created_at).toLocaleDateString() 
+    : 'N/A'}</td>
                 <td className="p-3 text-right"><button onClick={() => remove(o.id)} className="text-destructive hover:bg-destructive/10 h-8 w-8 inline-grid place-items-center" aria-label="Delete entry"><Icon name="trash-outline" size={15} /></button></td>
               </tr>
             ))}
