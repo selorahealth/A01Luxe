@@ -7,7 +7,6 @@ import { Icon } from "@/components/site/Icon";
 import { formatMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { deleteAdminOrder, listAdminOrders, updateAdminOrderStatus } from "@/lib/admin-orders.functions";
-
 type Order = {
   id: string;
   order_id: string;
@@ -17,7 +16,6 @@ type Order = {
   status: string;
   created_at: string;
 };
-
 const STATUSES = ["pending", "paid", "processing", "shipped", "delivered", "cancelled"];
 const STATUS_COLOR: Record<string, string> = {
   pending: "bg-yellow-500/15 text-yellow-800 border-yellow-500/30",
@@ -26,7 +24,6 @@ const STATUS_COLOR: Record<string, string> = {
   delivered: "bg-emerald-500/15 text-emerald-800 border-emerald-500/30",
   cancelled: "bg-destructive/15 text-destructive border-destructive/30",
 };
-
 export function OrdersTab() {
   const qc = useQueryClient();
   const listOrders = useServerFn(listAdminOrders);
@@ -37,7 +34,6 @@ export function OrdersTab() {
     queryFn: async () => (await listOrders()) as unknown as Order[],
   });
   const [openOrder, setOpenOrder] = useState<Order | null>(null);
-
   useEffect(() => {
     const ch = supabase
       .channel("admin-orders-live")
@@ -49,21 +45,19 @@ export function OrdersTab() {
       supabase.removeChannel(ch);
     };
   }, [qc]);
-
   async function updateStatus(id: string, status: string) {
     try {
-      await updateOrderStatus({ data: { id: openOrder?.order_id || id, status: status as never } });
+      await updateOrderStatus({ data: { id, status: status as never } });
       toast.success(`Status set to ${status}`);
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Status update failed");
     }
   }
-
-  async function removeOrder(orderId: string) {
+  async function removeOrder(id: string) {
     if (!confirm("Delete this order permanently?")) return;
     try {
-      await deleteOrder({ data: { id: orderId } });
+      await deleteOrder({ data: { id } });
       toast.success("Order deleted");
       setOpenOrder(null);
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
@@ -72,7 +66,6 @@ export function OrdersTab() {
       toast.error(e instanceof Error ? e.message : "Delete failed");
     }
   }
-
   return (
     <div className="space-y-3">
       {(orders ?? []).length === 0 && (
@@ -102,7 +95,7 @@ export function OrdersTab() {
                 {o.customer?.name} <span className="text-muted-foreground">· {o.items?.length ?? 0} items</span>
               </div>
               <div className="text-xs text-muted-foreground">
-                {o.created_at ? new Date(o.created_at).toLocaleString() : 'N/A'}
+                {new Date(o.created_at).toLocaleString()}
               </div>
             </div>
             <div className="text-right shrink-0">
@@ -111,21 +104,19 @@ export function OrdersTab() {
           </button>
         );
       })}
-
       <AnimatePresence>
         {openOrder && (
           <OrderModal
             order={openOrder}
             onClose={() => setOpenOrder(null)}
-            onStatus={(s) => updateStatus(openOrder.order_id, s)}
-            onDelete={() => removeOrder(openOrder.order_id)}
+            onStatus={(s) => updateStatus(openOrder.id, s)}
+            onDelete={() => removeOrder(openOrder.id)}
           />
         )}
       </AnimatePresence>
     </div>
   );
 }
-
 function OrderModal({ order, onClose, onStatus, onDelete }: { order: Order; onClose: () => void; onStatus: (s: string) => void; onDelete: () => void }) {
   const productIds = useMemo(
     () => Array.from(new Set((order.items ?? []).map((i) => i.product_id).filter(Boolean))),
@@ -159,14 +150,13 @@ function OrderModal({ order, onClose, onStatus, onDelete }: { order: Order; onCl
           <div>
             <h3 className="font-display text-xl font-bold">Order {order.order_id}</h3>
             <p className="text-xs text-muted-foreground">
-              {o.created_at ? new Date(o.created_at).toLocaleString() : 'N/A'}
+              {new Date(order.created_at).toLocaleString()}
             </p>
           </div>
           <button onClick={onClose} className="h-9 w-9 grid place-items-center rounded-full hover:bg-foreground/5">
             <Icon name="close-outline" size={22} />
           </button>
         </div>
-
         <div className="rounded-2xl bg-card border border-border p-4 mb-3">
           <h4 className="text-xs uppercase tracking-wider text-muted-foreground">Customer</h4>
           <div className="mt-1">
@@ -177,7 +167,6 @@ function OrderModal({ order, onClose, onStatus, onDelete }: { order: Order; onCl
             <div className="text-sm text-muted-foreground whitespace-pre-line">{order.customer?.address}</div>
           </div>
         </div>
-
         <div className="rounded-2xl bg-card border border-border p-4 mb-3">
           <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Items</h4>
           <div className="space-y-2">
@@ -207,7 +196,6 @@ function OrderModal({ order, onClose, onStatus, onDelete }: { order: Order; onCl
             <span className="font-display text-lg font-bold">{formatMoney(order.total_cents)}</span>
           </div>
         </div>
-
         <div>
           <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Status</h4>
           <div className="flex flex-wrap gap-2">
