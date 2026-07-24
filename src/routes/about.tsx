@@ -11,9 +11,9 @@ export const Route = createFileRoute("/about")({
   component: () => (
     <PageShell title="About Us" eyebrow="// The Story">
       <Prose>
-        <h3>
+        <b>
           A01LUXE was born out of a simple observation: modern luxury is defined by how you move.
-        </h3>
+        </b> 
         <p>
           The contemporary footwear landscape forces a compromise between raw comfort and elite aesthetic structure. 
           We rejected that divide. The name A01 represents the alpha state: 
@@ -23,9 +23,7 @@ export const Route = createFileRoute("/about")({
           Our curation spans the entire spectrum of modern movement, from the relaxed utility of molded slides and 
           streetwear sneakers to the sharp, uncompromising architecture of corporate leather and premium slippers. 
           We strip away the hype tax to focus entirely on silhouette, density, and form. Every pair is selected for its 
-          physical presence and structural durability.
-        </p> 
-        <p>
+          physical presence and structural durability. </br>
           A01LUXE exists for a generation that fluidly navigates diverse 
           spaces; moving effortlessly from casual street hangouts to corporate boardrooms without ever changing their core 
           identity. True status isn't about the logo on your chest; it is about the foundation beneath your feet.
