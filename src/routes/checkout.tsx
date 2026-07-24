@@ -139,7 +139,7 @@ function Checkout() {
               </div>
             ))}
           </div>
-          <div className="border border-border p-3 space-y-2">
+          {/* <div className="border border-border p-3 space-y-2">
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Delivery zone</div>
             <label className="flex items-center gap-2 cursor-pointer text-sm">
               <input type="radio" checked={form.lagos} onChange={() => setForm((s) => ({ ...s, lagos: true }))} />
@@ -149,7 +149,7 @@ function Checkout() {
               <input type="radio" checked={!form.lagos} onChange={() => setForm((s) => ({ ...s, lagos: false }))} />
               <span>Outside Lagos <span className="text-muted-foreground">({deliveryOutside > 0 ? money.format(deliveryOutside) : "we'll contact you"})</span></span>
             </label>
-          </div>
+          </div> */}
           {err && <p className="text-sm text-destructive">{err}</p>}
           <button type="submit" disabled={submitting} className="btn-primary w-full justify-center disabled:opacity-60">
             {submitting ? "Placing order…" : "Place order"} <Icon name="arrow-forward-outline" size={18} />
