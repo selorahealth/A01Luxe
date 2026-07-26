@@ -41,7 +41,7 @@ export const updateAdminOrderStatus = createServerFn({ method: "POST" })
     const { data: updatedOrder, error } = await supabaseAdmin
       .from("orders")
       .update({ status: data.status })
-      .eq("id", data.id)
+      .or(`id.eq.${data.id},order_id.eq.${data.id}`)
       .select("*")
       .single();
 
