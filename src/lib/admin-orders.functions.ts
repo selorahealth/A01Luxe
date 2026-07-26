@@ -25,7 +25,7 @@ export const updateAdminOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     z
       .object({
-        id: z.string().uuid(),
+        id: z.string().min(1),   // accepts both UUID and order_id
         status: z.enum(["pending", "paid", "processing", "shipped", "delivered", "cancelled"]),
       })
       .parse(data),
