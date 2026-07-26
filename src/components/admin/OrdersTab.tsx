@@ -7,6 +7,7 @@ import { Icon } from "@/components/site/Icon";
 import { formatMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { deleteAdminOrder, listAdminOrders, updateAdminOrderStatus } from "@/lib/admin-orders.functions";
+
 type Order = {
   id: string;
   order_id: string;
@@ -46,14 +47,24 @@ export function OrdersTab() {
       supabase.removeChannel(ch);
     };
   }, [qc]);
+  
   async function updateStatus(id: string, status: string) {
     try {
-    await updateOrderStatus({ data: { id, status: status as never } });
-    toast.success(`Status set to ${status}`);
-    qc.invalidateQueries({ queryKey: ["admin-orders"] });
-  } catch (e) {
-    toast.error(e instanceof Error ? e.message : "Status update failed");
-  }
+      await updateOrderStatus({ data: { id, status: status as never } });
+      toast.success(`Status set to ${status}`);
+      
+      // Force refresh
+      await qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      
+      // Also update the currently open modal
+      if (openOrder) {
+        const fresh = (await listOrders()) as Order[];
+        const updated = fresh.find(o => o.id === openOrder.id || o.order_id === openOrder.order_id);
+        if (updated) setOpenOrder(updated);
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Status update failed");
+    }
 }
   async function removeOrder(id: string) {
     if (!confirm("Delete this order permanently?")) return;
