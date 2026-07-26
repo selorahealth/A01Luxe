@@ -43,21 +43,21 @@ export async function generateAndUploadReceipt(order: any) {
 
   const fileName = `${order.order_id}-${timestamp}.pdf`;
 
-  const { error: uploadError } = await supabase.storage
-    .from("receipts")
-    .upload(fileName, buffer, {
-      contentType: "application/pdf",
-      upsert: true,
-    });
+const { error: uploadError } = await supabase.storage
+  .from("media")
+  .upload(`receipts/${fileName}`, buffer, {
+    contentType: "application/pdf",
+    upsert: true,
+  });
 
-  if (uploadError) {
-    console.error("Upload failed:", uploadError);
-    throw new Error("Failed to upload receipt");
-  }
+if (uploadError) {
+  console.error("Upload failed:", uploadError);
+  throw new Error("Failed to upload receipt");
+}
 
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("receipts").getPublicUrl(fileName);
+const {
+  data: { publicUrl },
+} = supabase.storage.from("media").getPublicUrl(`receipts/${fileName}`);
 
-  return publicUrl;
+return publicUrl;
 }
