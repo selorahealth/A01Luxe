@@ -15,6 +15,7 @@ type Order = {
   total_cents: number;
   status: string;
   created_at: string;
+  receipt_url?: string | null;
 };
 const STATUSES = ["pending", "paid", "processing", "shipped", "delivered", "cancelled"];
 const STATUS_COLOR: Record<string, string> = {
