@@ -38,8 +38,28 @@ export const updateAdminOrderStatus = createServerFn({ method: "POST" })
     if (permissionError) throw permissionError;
     if (!allowed) throw new Error("You do not have permission to manage orders.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("orders").update({ status: data.status }).eq("id", data.id);
+    const { data: updatedOrder, error } = await supabaseAdmin
+      .from("orders")
+      .update({ status: data.status })
+      .eq("id", data.id)
+      .select("*")
+      .single();
+
     if (error) throw error;
+
+    // Generate receipt when status becomes "paid"
+    if (data.status === "paid" && updatedOrder) {
+      try {
+        const { generateAndUploadReceipt } = await import("@/lib/receipts/generateReceipt");
+        const receiptUrl = await generateAndUploadReceipt(updatedOrder);
+
+        await supabaseAdmin
+          .from("orders")
+          .update({ receipt_url: receiptUrl })
+          .eq("id", updatedOrder.id);
+      } catch (err) {
+        console.error("Receipt generation failed:", err);
+      }
     return { ok: true };
   });
 
