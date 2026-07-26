@@ -1,18 +1,44 @@
-import { Document, Page, Text, View, StyleSheet, Image, Font } from "@react-pdf/renderer";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  Font,
+} from "@react-pdf/renderer";
 
+// Register your brand fonts
+// Make sure these .ttf files exist in /public/fonts/
 Font.register({
   family: "SpaceGrotesk",
   fonts: [
-    { src: "/fonts/SpaceGrotesk-Regular.ttf", fontWeight: 400 },
-    { src: "/fonts/SpaceGrotesk-Bold.ttf", fontWeight: 700 },
+    {
+      src: "/fonts/SpaceGrotesk-Regular.ttf",
+      fontWeight: 400,
+    },
+    {
+      src: "/fonts/SpaceGrotesk-Bold.ttf",
+      fontWeight: 700,
+    },
   ],
 });
 
 Font.register({
   family: "Montserrat",
   fonts: [
-    { src: "/fonts/Montserrat-Regular.ttf", fontWeight: 400 },
-    { src: "/fonts/Montserrat-Medium.ttf", fontWeight: 500 },
+    {
+      src: "/fonts/Montserrat-Regular.ttf",
+      fontWeight: 400,
+    },
+    {
+      src: "/fonts/Montserrat-Medium.ttf",
+      fontWeight: 500,
+    },
+    {
+      src: "/fonts/Montserrat-SemiBold.ttf",
+      fontWeight: 600,
+    },
   ],
 });
 
@@ -20,7 +46,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: "Montserrat",   // body text
+    fontFamily: "Montserrat",
     color: "#1a1a1a",
   },
   header: {
@@ -33,50 +59,63 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: "SpaceGrotesk",
     fontWeight: 700,
-    color: "#555",
-    letterSpacing: 1,
+    color: "#555555",
+    letterSpacing: 1.5,
   },
   storeName: {
     fontSize: 11,
-    color: "#666",
+    fontFamily: "Montserrat",
+    fontWeight: 500,
+    color: "#666666",
     marginTop: 4,
   },
   logo: {
-    width: 48,
-    height: 48,
+    width: 52,
+    height: 52,
   },
   metaBox: {
     borderWidth: 1,
     borderColor: "#e5e5e5",
-    padding: 10,
-    marginBottom: 20,
-    width: 220,
+    padding: 12,
+    marginBottom: 22,
+    width: 240,
   },
   metaRow: {
     flexDirection: "row",
-    marginBottom: 3,
+    marginBottom: 4,
   },
   metaLabel: {
-    width: 80,
-    fontWeight: "bold",
+    width: 85,
+    fontFamily: "Montserrat",
+    fontWeight: 600,
+  },
+  metaValue: {
+    fontFamily: "Montserrat",
+    fontWeight: 400,
   },
   sectionTitle: {
     fontSize: 13,
-    fontWeight: "bold",
-    marginBottom: 8,
-    marginTop: 12,
+    fontFamily: "SpaceGrotesk",
+    fontWeight: 700,
+    marginBottom: 6,
+    marginTop: 8,
   },
   tableHeader: {
     flexDirection: "row",
     backgroundColor: "#d1d5db",
-    paddingVertical: 6,
+    paddingVertical: 7,
     paddingHorizontal: 8,
+  },
+  tableHeaderText: {
+    fontFamily: "Montserrat",
+    fontWeight: 600,
+    fontSize: 9,
   },
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#e5e5e5",
-    paddingVertical: 8,
+    paddingVertical: 9,
     paddingHorizontal: 8,
   },
   colNo: { width: "8%" },
@@ -85,24 +124,33 @@ const styles = StyleSheet.create({
   colPrice: { width: "17%", textAlign: "right" },
   colTotal: { width: "18%", textAlign: "right" },
   totals: {
-    marginTop: 16,
+    marginTop: 18,
     alignItems: "flex-end",
   },
   totalRow: {
     flexDirection: "row",
-    width: 180,
+    width: 190,
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 5,
+  },
+  totalLabel: {
+    fontFamily: "Montserrat",
+    fontWeight: 500,
   },
   grandTotal: {
     flexDirection: "row",
-    backgroundColor: "#111",
-    color: "#fff",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    width: 180,
+    backgroundColor: "#111111",
+    color: "#ffffff",
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    width: 190,
     justifyContent: "space-between",
-    marginTop: 6,
+    marginTop: 8,
+  },
+  grandTotalText: {
+    fontFamily: "SpaceGrotesk",
+    fontWeight: 700,
+    fontSize: 11,
   },
   footer: {
     position: "absolute",
@@ -111,7 +159,9 @@ const styles = StyleSheet.create({
     right: 0,
     textAlign: "center",
     fontSize: 11,
-    color: "#666",
+    fontFamily: "Montserrat",
+    fontWeight: 500,
+    color: "#666666",
   },
 });
 
@@ -131,7 +181,7 @@ type ReceiptProps = {
   subtotalCents: number;
   deliveryFeeCents?: number;
   totalCents: number;
-  logoUrl?: string; // public URL of the logo
+  logoUrl?: string;
 };
 
 function formatNaira(cents: number) {
@@ -176,33 +226,41 @@ export function ReceiptDocument({
           {logoUrl && <Image src={logoUrl} style={styles.logo} />}
         </View>
 
-        {/* Meta */}
+        {/* Meta Box */}
         <View style={styles.metaBox}>
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>Order ID:</Text>
-            <Text>{orderId}</Text>
+            <Text style={styles.metaValue}>{orderId}</Text>
           </View>
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>Date & Time:</Text>
-            <Text>{formatDate(createdAt)}</Text>
+            <Text style={styles.metaValue}>{formatDate(createdAt)}</Text>
           </View>
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>Customer:</Text>
-            <Text>{customerName}</Text>
+            <Text style={styles.metaValue}>{customerName}</Text>
           </View>
         </View>
 
         {/* Order Details */}
         <Text style={styles.sectionTitle}>Order Details</Text>
-        <Text style={{ marginBottom: 6, fontWeight: "bold" }}>Order</Text>
+        <Text
+          style={{
+            marginBottom: 8,
+            fontFamily: "Montserrat",
+            fontWeight: 600,
+          }}
+        >
+          Order
+        </Text>
 
         {/* Table Header */}
         <View style={styles.tableHeader}>
-          <Text style={styles.colNo}>No.</Text>
-          <Text style={styles.colDesc}>Description</Text>
-          <Text style={styles.colQty}>Quantity</Text>
-          <Text style={styles.colPrice}>Unit Price</Text>
-          <Text style={styles.colTotal}>Total</Text>
+          <Text style={[styles.colNo, styles.tableHeaderText]}>No.</Text>
+          <Text style={[styles.colDesc, styles.tableHeaderText]}>Description</Text>
+          <Text style={[styles.colQty, styles.tableHeaderText]}>Quantity</Text>
+          <Text style={[styles.colPrice, styles.tableHeaderText]}>Unit Price</Text>
+          <Text style={[styles.colTotal, styles.tableHeaderText]}>Total</Text>
         </View>
 
         {/* Table Rows */}
@@ -231,20 +289,20 @@ export function ReceiptDocument({
         {/* Totals */}
         <View style={styles.totals}>
           <View style={styles.totalRow}>
-            <Text>Sub Total</Text>
+            <Text style={styles.totalLabel}>Sub Total</Text>
             <Text>{formatNaira(subtotalCents)}</Text>
           </View>
           <View style={styles.totalRow}>
-            <Text>Delivery</Text>
+            <Text style={styles.totalLabel}>Delivery</Text>
             <Text>{formatNaira(deliveryFeeCents)}</Text>
           </View>
           <View style={styles.totalRow}>
-            <Text>Tax</Text>
+            <Text style={styles.totalLabel}>Tax</Text>
             <Text>₦0.00</Text>
           </View>
           <View style={styles.grandTotal}>
-            <Text>TOTAL</Text>
-            <Text>{formatNaira(totalCents)}</Text>
+            <Text style={styles.grandTotalText}>TOTAL</Text>
+            <Text style={styles.grandTotalText}>{formatNaira(totalCents)}</Text>
           </View>
         </View>
 
