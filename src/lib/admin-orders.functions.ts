@@ -61,6 +61,8 @@ export const updateAdminOrderStatus = createServerFn({ method: "POST" })
           .eq("id", updatedOrder.id);
       } catch (err) {
         console.error("Receipt generation failed:", err);
+        // Temporary: throw the error so we can see it in the Network tab
+    throw new Error(`Receipt generation failed: ${err?.message || String(err)}`);
       }
     }
 
