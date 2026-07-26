@@ -25,7 +25,7 @@ export const updateAdminOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     z
       .object({
-        id: z.string().min(1),   // accepts both UUID and order_id
+        id: z.string().min(1),
         status: z.enum(["pending", "paid", "processing", "shipped", "delivered", "cancelled"]),
       })
       .parse(data),
@@ -37,7 +37,9 @@ export const updateAdminOrderStatus = createServerFn({ method: "POST" })
     });
     if (permissionError) throw permissionError;
     if (!allowed) throw new Error("You do not have permission to manage orders.");
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
     const { data: updatedOrder, error } = await supabaseAdmin
       .from("orders")
       .update({ status: data.status })
@@ -60,6 +62,8 @@ export const updateAdminOrderStatus = createServerFn({ method: "POST" })
       } catch (err) {
         console.error("Receipt generation failed:", err);
       }
+    }
+
     return { ok: true };
   });
 
