@@ -212,6 +212,19 @@ function OrderModal({ order, onClose, onStatus, onDelete }: { order: Order; onCl
             ))}
           </div>
         </div>
+        {order.receipt_url && (
+          <div className="mt-4">
+            <a
+              href={order.receipt_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg"
+            >
+              Download Receipt
+            </a>
+          </div>
+        )}
+        
         <button onClick={onDelete} className="mt-5 w-full border border-destructive text-destructive px-4 py-2 text-sm font-bold uppercase hover:bg-destructive/10 inline-flex items-center justify-center gap-2">
           <Icon name="trash-outline" size={16} /> Delete order
         </button>
