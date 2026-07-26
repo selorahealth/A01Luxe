@@ -48,13 +48,13 @@ export function OrdersTab() {
   }, [qc]);
   async function updateStatus(id: string, status: string) {
     try {
-      await updateOrderStatus({ data: { id, status: status as never } });
-      toast.success(`Status set to ${status}`);
-      qc.invalidateQueries({ queryKey: ["admin-orders"] });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Status update failed");
-    }
+    await updateOrderStatus({ data: { id, status: status as never } });
+    toast.success(`Status set to ${status}`);
+    qc.invalidateQueries({ queryKey: ["admin-orders"] });
+  } catch (e) {
+    toast.error(e instanceof Error ? e.message : "Status update failed");
   }
+}
   async function removeOrder(id: string) {
     if (!confirm("Delete this order permanently?")) return;
     try {
@@ -110,8 +110,8 @@ export function OrdersTab() {
           <OrderModal
             order={openOrder}
             onClose={() => setOpenOrder(null)}
-            onStatus={(s) => updateStatus(openOrder.id, s)}
-            onDelete={() => removeOrder(openOrder.id)}
+            onStatus={(s) => updateStatus(openOrder.order_id || openOrder.id, s)}
+            onDelete={() => removeOrder(openOrder.order_id || openOrder.id)}
           />
         )}
       </AnimatePresence>
