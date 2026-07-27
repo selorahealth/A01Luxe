@@ -41,30 +41,29 @@ export const updateAdminOrderStatus = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: updatedOrder, error } = await supabaseAdmin
-      .from("orders")
-      .update({ status: data.status })
-      .or(`id.eq.${data.id},order_id.eq.${data.id}`)
-      .select("*")
-      .single();
+  .from("orders")
+  .update({ status: data.status })
+  .or(`id.eq.${data.id},order_id.eq.${data.id}`)
+  .select("*")
+  .single();
 
     if (error) throw error;
 
     // Generate receipt when status becomes "paid"
-    if (data.status === "paid" && updatedOrder) {
-      try {
-        const { generateAndUploadReceipt } = await import("@/lib/receipts/generateReceipt");
-        const receiptUrl = await generateAndUploadReceipt(updatedOrder);
+if (data.status === "paid" && updatedOrder) {
+  try {
+    const { generateAndUploadReceipt } = await import("@/lib/receipts/generateReceipt");
+    const receiptUrl = await generateAndUploadReceipt(updatedOrder);
 
-        await supabaseAdmin
-          .from("orders")
-          .update({ receipt_url: receiptUrl })
-          .eq("id", updatedOrder.id);
-      } catch (err) {
-        console.error("Receipt generation failed:", err);
-        // Temporary: throw the error so we can see it in the Network tab
+    await supabaseAdmin
+      .from("orders")
+      .update({ receipt_url: receiptUrl })
+      .eq("order_id", updatedOrder.order_id);   // ← use order_id
+  } catch (err: any) {
+    console.error("Receipt generation failed:", err);
     throw new Error(`Receipt generation failed: ${err?.message || String(err)}`);
-      }
-    }
+  }
+}
 
     return { ok: true };
   });
