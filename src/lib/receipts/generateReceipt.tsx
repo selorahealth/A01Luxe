@@ -2,7 +2,6 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { ReceiptDocument } from "./ReceiptDocument";
 
 export async function generateAndUploadReceipt(order: any) {
-  // Use the same admin client that the rest of the app uses
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const items = (order.items || []).map((i: any) => ({
@@ -40,6 +39,7 @@ export async function generateAndUploadReceipt(order: any) {
 
   const fileName = `${order.order_id}-${timestamp}.pdf`;
 
+  // Upload the file
   const { error: uploadError } = await supabaseAdmin.storage
     .from("media")
     .upload(`receipts/${fileName}`, buffer, {
@@ -52,21 +52,7 @@ export async function generateAndUploadReceipt(order: any) {
     throw new Error("Failed to upload receipt: " + uploadError.message);
   }
 
-  const {
-    data: { publicUrl },
-  } = supabaseAdmin.storage
+  // Create a signed URL that expires in 30 days
+  const { data: signed, error: signError } = await supabaseAdmin.storage
     .from("media")
-    .getPublicUrl(`receipts/${fileName}`);
-
-  return publicUrl;
-}
-
-const { data: signed, error: signError } = await supabaseAdmin.storage
-  .from("media")
-  .createSignedUrl(`receipts/${fileName}`, 60 * 60 * 24 * 30); // 30 days
-
-if (signError || !signed?.signedUrl) {
-  throw new Error("Failed to create signed URL");
-}
-
-return signed.signedUrl;
+    .createSignedUrl(`receipts/${fileName}`, 60 *
