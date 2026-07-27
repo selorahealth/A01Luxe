@@ -9,11 +9,23 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
+import { PaystackButton } from "@/components/checkout/PaystackButton";
 
 const search = z.object({
   order: z.string(),
   total: z.coerce.number().default(0),
 });
+
+useEffect(() => {
+  const script = document.createElement("script");
+  script.src = "https://js.paystack.co/v1/inline.js";
+  script.async = true;
+  document.body.appendChild(script);
+
+  return () => {
+    document.body.removeChild(script);
+  };
+}, []);
 
 export const Route = createFileRoute("/thank-you")({
   validateSearch: (s) => search.parse(s),
@@ -72,11 +84,16 @@ function ThankYou() {
         <div className="mt-8 border border-border p-6 text-left space-y-3">
           <Row label="Order ID" value={order} onCopy={() => copy("order", order)} copied={copied === "order"} />
           <Row label="Amount" value={money.format(total)} />
-          {p?.bankName && <Row label="Bank" value={p.bankName} />}
-          {p?.accountName && <Row label="Account name" value={p.accountName} />}
-          {p?.accountNumber && (
-            <Row label="Account number" value={maskedAcct} onCopy={() => copy("acct", p.accountNumber)} copied={copied === "acct"} />
-          )}
+          <PaystackButton
+  orderId={order.order_id}
+  amount={order.total_cents / 100}
+  email={order.customer.email}
+  customerName={order.customer.name}
+  onSuccess={(reference) => {
+    // We will add automatic status update later
+    console.log("Payment successful. Reference:", reference);
+  }}
+/>
         </div>
 
         {p?.instructions && (
