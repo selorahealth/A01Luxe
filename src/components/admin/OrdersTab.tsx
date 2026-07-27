@@ -89,7 +89,7 @@ export function OrdersTab() {
         const thumb = o.items?.[0]?.image;
         return (
           <button
-            key={o.id}
+            key={o.order_id || o.id}
             onClick={() => setOpenOrder(o)}
             className="w-full text-left rounded-2xl bg-card border border-border p-3 hover:shadow-md transition-shadow grid grid-cols-[64px_1fr_auto] gap-3 items-center"
           >
