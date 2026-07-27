@@ -40,7 +40,7 @@ export async function generateAndUploadReceipt(order: any) {
 
   const fileName = `${order.order_id}-${timestamp}.pdf`;
 
-  // Upload the file
+   // Upload the file
   const { error: uploadError } = await supabaseAdmin.storage
     .from("media")
     .upload(`receipts/${fileName}`, buffer, {
@@ -56,4 +56,12 @@ export async function generateAndUploadReceipt(order: any) {
   // Create a signed URL that expires in 30 days
   const { data: signed, error: signError } = await supabaseAdmin.storage
     .from("media")
-    .createSignedUrl(`receipts/${fileName}`, 60 *
+    .createSignedUrl(`receipts/${fileName}`, 60 * 60 * 24 * 30); // 30 days
+
+  if (signError || !signed?.signedUrl) {
+    console.error("Signed URL failed:", signError);
+    throw new Error("Failed to create signed URL");
+  }
+
+  return signed.signedUrl;
+}
