@@ -1,3 +1,4 @@
+// faaaaaa!
 import { renderToBuffer } from "@react-pdf/renderer";
 import { ReceiptDocument } from "./ReceiptDocument";
 
