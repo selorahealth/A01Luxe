@@ -23,13 +23,13 @@ export const listAdminOrders = createServerFn({ method: "GET" })
 export const updateAdminOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
-    z
-      .object({
-        id: z.string().min(1),
-        status: z.enum(["pending", "paid", "processing", "shipped", "delivered", "cancelled"]),
-      })
-      .parse(data),
-  )
+  z
+    .object({
+      id: z.string().min(1),          // now accepts order_id
+      status: z.enum(["pending", "paid", "processing", "shipped", "delivered", "cancelled"]),
+    })
+    .parse(data),
+)
   .handler(async ({ data, context }) => {
     const { data: allowed, error: permissionError } = await context.supabase.rpc("has_permission", {
       _user_id: context.userId,
