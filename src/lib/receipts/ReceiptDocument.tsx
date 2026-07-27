@@ -8,17 +8,15 @@ import {
   Font,
 } from "@react-pdf/renderer";
 
-// Register your brand fonts
-// Make sure these .ttf files exist in /public/fonts/
 Font.register({
   family: "SpaceGrotesk",
   fonts: [
     {
-      src: "/fonts/SpaceGrotesk-Regular.ttf",
+      src: "https://a01luxe.vercel.app/fonts/SpaceGrotesk-Regular.ttf",
       fontWeight: 400,
     },
     {
-      src: "/fonts/SpaceGrotesk-Bold.ttf",
+      src: "https://a01luxe.vercel.app/fonts/SpaceGrotesk-Bold.ttf",
       fontWeight: 700,
     },
   ],
@@ -28,16 +26,12 @@ Font.register({
   family: "Montserrat",
   fonts: [
     {
-      src: "/fonts/Montserrat-Regular.ttf",
+      src: "https://a01luxe.vercel.app/fonts/Montserrat-Regular.ttf",
       fontWeight: 400,
     },
     {
-      src: "/fonts/Montserrat-Medium.ttf",
-      fontWeight: 500,
-    },
-    {
-      src: "/fonts/Montserrat-SemiBold.ttf",
-      fontWeight: 600,
+      src: "https://a01luxe.vercel.app/fonts/Montserrat-Bold.ttf",
+      fontWeight: 700,
     },
   ],
 });
