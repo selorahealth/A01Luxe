@@ -1,13 +1,10 @@
 import { renderToBuffer } from "@react-pdf/renderer";
-import { createClient } from "@supabase/supabase-js";
 import { ReceiptDocument } from "./ReceiptDocument";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function generateAndUploadReceipt(order: any) {
+  // Use the same admin client that the rest of the app uses
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
   const items = (order.items || []).map((i: any) => ({
     name: i.name,
     qty: i.qty,
@@ -43,21 +40,23 @@ export async function generateAndUploadReceipt(order: any) {
 
   const fileName = `${order.order_id}-${timestamp}.pdf`;
 
-const { error: uploadError } = await supabase.storage
-  .from("media")
-  .upload(`receipts/${fileName}`, buffer, {
-    contentType: "application/pdf",
-    upsert: true,
-  });
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from("media")
+    .upload(`receipts/${fileName}`, buffer, {
+      contentType: "application/pdf",
+      upsert: true,
+    });
 
-if (uploadError) {
-  console.error("Upload failed:", uploadError);
-  throw new Error("Failed to upload receipt");
-}
+  if (uploadError) {
+    console.error("Upload failed:", uploadError);
+    throw new Error("Failed to upload receipt: " + uploadError.message);
+  }
 
-const {
-  data: { publicUrl },
-} = supabase.storage.from("media").getPublicUrl(`receipts/${fileName}`);
+  const {
+    data: { publicUrl },
+  } = supabaseAdmin.storage
+    .from("media")
+    .getPublicUrl(`receipts/${fileName}`);
 
-return publicUrl;
+  return publicUrl;
 }
