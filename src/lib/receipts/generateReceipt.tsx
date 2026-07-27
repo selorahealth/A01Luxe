@@ -60,3 +60,13 @@ export async function generateAndUploadReceipt(order: any) {
 
   return publicUrl;
 }
+
+const { data: signed, error: signError } = await supabaseAdmin.storage
+  .from("media")
+  .createSignedUrl(`receipts/${fileName}`, 60 * 60 * 24 * 30); // 30 days
+
+if (signError || !signed?.signedUrl) {
+  throw new Error("Failed to create signed URL");
+}
+
+return signed.signedUrl;
