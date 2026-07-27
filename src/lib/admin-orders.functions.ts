@@ -70,7 +70,9 @@ if (data.status === "paid" && updatedOrder) {
 
 export const deleteAdminOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .inputValidator((data) =>
+    z.object({ id: z.string().min(1) }).parse(data)   // accept any non-empty string (order_id)
+  )
   .handler(async ({ data, context }) => {
     const { data: allowed, error: permissionError } = await context.supabase.rpc("has_permission", {
       _user_id: context.userId,
@@ -78,8 +80,15 @@ export const deleteAdminOrder = createServerFn({ method: "POST" })
     });
     if (permissionError) throw permissionError;
     if (!allowed) throw new Error("You do not have permission to manage orders.");
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("orders").delete().eq("id", data.id);
+
+    // Delete by order_id (the real identifier)
+    const { error } = await supabaseAdmin
+      .from("orders")
+      .delete()
+      .eq("order_id", data.id);
+
     if (error) throw error;
     return { ok: true };
   });
