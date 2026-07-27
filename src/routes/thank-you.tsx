@@ -151,7 +151,7 @@ function ThankYou() {
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground">
-          Prefer bank transfer? Contact us on WhatsApp after payment.
+          Performed a bank transfer? Click the button below to upload your receipt.
         </p>
 
         {/* Optional receipt upload (kept for bank transfer fallback) */}
@@ -163,8 +163,8 @@ function ThankYou() {
             className="mt-6 w-full inline-flex cursor-pointer items-center justify-center gap-2 px-5 py-4 text-white font-black uppercase text-base sm:text-lg tracking-widest shadow-lg active:scale-[0.98] transition-transform"
             style={{ backgroundColor: "#25D366" }}
           >
-            <Icon name="receipt-outline" size={22} />
-            {uploading ? "Uploading receipt…" : "Upload receipt (bank transfer only)"}
+            <Icon name="file-up-outline" size={22} />
+            {uploading ? "Uploading receipt…" : "Click to Upload receipt"}
             <input
               type="file"
               accept="image/*,application/pdf"
