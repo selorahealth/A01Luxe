@@ -151,7 +151,7 @@ function ThankYou() {
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground">
-          Performed a bank transfer? Click the button below to upload your receipt.
+          Use your Order ID as the transfer reference. Then upload your receipt below.
         </p>
 
         {/* Optional receipt upload (kept for bank transfer fallback) */}
