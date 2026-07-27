@@ -290,10 +290,6 @@ export function ReceiptDocument({
             <Text style={styles.totalLabel}>Delivery</Text>
             <Text>{formatNaira(deliveryFeeCents)}</Text>
           </View>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Tax</Text>
-            <Text>₦0.00</Text>
-          </View>
           <View style={styles.grandTotal}>
             <Text style={styles.grandTotalText}>TOTAL</Text>
             <Text style={styles.grandTotalText}>{formatNaira(totalCents)}</Text>
