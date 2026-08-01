@@ -214,8 +214,9 @@ function ThankYou() {
     className="mt-6 w-full inline-flex cursor-pointer items-center justify-center gap-2 px-5 py-4 text-white font-black uppercase text-base sm:text-lg tracking-widest shadow-lg active:scale-[0.98] transition-transform"
     style={{ backgroundColor: "#25D366" }}
   >
-    <span className="text-xl leading-none">→</span>
+    
     {uploading ? "Uploading receipt…" : "Upload your receipt after payment"}
+    <span className="text-xl leading-none">→</span>
     <input
       type="file"
       accept="image/*,application/pdf"
