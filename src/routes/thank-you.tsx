@@ -174,7 +174,7 @@ function ThankYou() {
     Payments are temporarily received into the founder’s personal account.  
     Your order is fully protected and we will update the account details as soon as the business account is ready. 
   </p>
-  <p> 
+  <p className="mt-1.5 text-sm leading-relaxed text-amber-100/90"> 
     After making the transfer, take a screenshot of your transaction or save the receipt as a PDF or image. 
     Then click on the upload button below to send your receipt to our Customer Representative.
   </p>
