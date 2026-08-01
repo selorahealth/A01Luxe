@@ -18,7 +18,7 @@ const PAYSTACK_ENABLED = false;
 // ============================================================
 
 const search = z.object({
-  order: z.string(),
+  order: z.string().optional(),
   total: z.coerce.number().default(0),
 });
 
@@ -57,6 +57,8 @@ function ThankYou() {
 
   // Fetch customer details (for when Paystack becomes active)
   useEffect(() => {
+    if (!order) return;
+
     async function loadOrder() {
       const { data } = await supabase.rpc("track_order_public", {
         _order_id: order,
@@ -66,7 +68,7 @@ function ThankYou() {
         setCustomerName(data[0].customer?.name || "");
       }
     }
-    if (order) loadOrder();
+    loadOrder();
   }, [order]);
 
   useEffect(() => {
@@ -82,7 +84,7 @@ function ThankYou() {
   }
 
   async function uploadReceipt(file: File | null) {
-    if (!file) return;
+    if (!file || !order) return;
     setUploading(true);
     try {
       const url = await uploadMedia(file, "receipts");
@@ -106,6 +108,26 @@ function ThankYou() {
     } finally {
       setUploading(false);
     }
+  }
+
+  // Fallback when someone visits /thank-you without an order ID
+  if (!order) {
+    return (
+      <PageShell>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-24 text-center">
+          <h1 className="font-display text-3xl font-black uppercase">No order found</h1>
+          <p className="mt-3 text-muted-foreground">
+            This page is only available after placing an order.
+          </p>
+          <Link
+            to="/shop"
+            className="mt-8 inline-block text-sm text-primary hover:underline"
+          >
+            Continue shopping
+          </Link>
+        </div>
+      </PageShell>
+    );
   }
 
   return (
@@ -144,12 +166,10 @@ function ThankYou() {
 
         {/* Warning about personal account */}
         <div className="mt-6 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-left text-sm text-amber-900 dark:text-amber-100">
-          <p className="font-medium">
-            Temporary payment arrangement
-          </p>
+          <p className="font-medium">Temporary payment arrangement</p>
           <p className="mt-1 text-xs leading-relaxed opacity-90">
-            We are currently finalizing our official business bank account.  
-            Payments are temporarily received into the founder’s personal account.  
+            We are currently finalizing our official business bank account.
+            Payments are temporarily received into the founder’s personal account.
             Your order is fully protected and we will update the account details as soon as the business account is ready.
           </p>
         </div>
