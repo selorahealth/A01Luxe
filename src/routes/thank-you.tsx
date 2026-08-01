@@ -11,6 +11,12 @@ import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 import { PaystackButton } from "@/components/checkout/PaystackButton";
 
+// ============================================================
+// 🔧 EASY TOGGLE — Change this to true when Paystack is ready
+// ============================================================
+const PAYSTACK_ENABLED = false;
+// ============================================================
+
 const search = z.object({
   order: z.string(),
   total: z.coerce.number().default(0),
@@ -38,8 +44,9 @@ function ThankYou() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState("");
 
-  // Load Paystack script once
+  // Load Paystack script only when enabled
   useEffect(() => {
+    if (!PAYSTACK_ENABLED) return;
     if (document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]')) return;
 
     const script = document.createElement("script");
@@ -48,7 +55,7 @@ function ThankYou() {
     document.body.appendChild(script);
   }, []);
 
-  // Fetch customer details so Paystack can prefill email/name
+  // Fetch customer details (for when Paystack becomes active)
   useEffect(() => {
     async function loadOrder() {
       const { data } = await supabase.rpc("track_order_public", {
@@ -135,26 +142,44 @@ function ThankYou() {
           <Row label="Amount" value={money.format(total)} />
         </div>
 
-        {/* Paystack Button */}
-        <div className="mt-8">
-          <PaystackButton
-            orderId={order}
-            amount={total / 100} // total is in kobo/cents → convert to Naira
-            email={customerEmail || "customer@a01luxe.com"}
-            customerName={customerName || "Customer"}
-            onSuccess={(reference) => {
-              toast.success("Payment successful! We will confirm shortly.");
-              console.log("Paystack reference:", reference);
-              // Optional: mark order as paid here later
-            }}
-          />
+        {/* Warning about personal account */}
+        <div className="mt-6 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-left text-sm text-amber-900 dark:text-amber-100">
+          <p className="font-medium">
+            Temporary payment arrangement
+          </p>
+          <p className="mt-1 text-xs leading-relaxed opacity-90">
+            We are currently finalizing our official business bank account.  
+            Payments are temporarily received into the founder’s personal account.  
+            Your order is fully protected and we will update the account details as soon as the business account is ready.
+          </p>
         </div>
 
-        <p className="mt-4 text-xs text-muted-foreground">
-          Use your Order ID as the transfer reference. Then upload your receipt below.
-        </p>
+        {/* Bank transfer details */}
+        <div className="mt-6 border border-border p-6 text-left space-y-3">
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">
+            Bank Transfer Details
+          </div>
 
-        {/* Optional receipt upload (kept for bank transfer fallback) */}
+          {p?.bankName && <Row label="Bank" value={p.bankName} />}
+          {p?.accountName && <Row label="Account name" value={p.accountName} />}
+          {p?.accountNumber && (
+            <Row
+              label="Account number"
+              value={p.accountNumber}
+              onCopy={() => copy("acct", p.accountNumber)}
+              copied={copied === "acct"}
+            />
+          )}
+
+          <div className="pt-3 mt-2 border-t border-border">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              <span className="font-semibold text-foreground">Important:</span> Please use your{" "}
+              <span className="font-mono font-bold text-foreground">{order}</span> as the payment reference when making the transfer.
+            </p>
+          </div>
+        </div>
+
+        {/* Receipt upload */}
         {digits && (
           <motion.label
             initial={{ scale: 1 }}
@@ -164,7 +189,7 @@ function ThankYou() {
             style={{ backgroundColor: "#25D366" }}
           >
             <Icon name="file-up-outline" size={22} />
-            {uploading ? "Uploading receipt…" : "Click to Upload receipt"}
+            {uploading ? "Uploading receipt…" : "Upload your receipt after payment"}
             <input
               type="file"
               accept="image/*,application/pdf"
@@ -175,7 +200,39 @@ function ThankYou() {
           </motion.label>
         )}
 
-        <div className="mt-6 flex gap-3 justify-center">
+        {/* Paystack section */}
+        <div className="mt-10 pt-8 border-t border-border">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <span className="text-sm font-medium">Pay with Paystack</span>
+            {!PAYSTACK_ENABLED && (
+              <span className="text-[10px] uppercase tracking-wider font-bold bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                Not active yet
+              </span>
+            )}
+          </div>
+
+          {PAYSTACK_ENABLED ? (
+            <PaystackButton
+              orderId={order}
+              amount={total / 100}
+              email={customerEmail || "customer@a01luxe.com"}
+              customerName={customerName || "Customer"}
+              onSuccess={(reference) => {
+                toast.success("Payment successful! We will confirm shortly.");
+                console.log("Paystack reference:", reference);
+              }}
+            />
+          ) : (
+            <button
+              disabled
+              className="w-full bg-muted text-muted-foreground font-bold uppercase tracking-wider py-4 rounded-none cursor-not-allowed opacity-60"
+            >
+              Paystack coming soon
+            </button>
+          )}
+        </div>
+
+        <div className="mt-8 flex gap-3 justify-center">
           <Link
             to="/track-order"
             search={{ id: order }}
