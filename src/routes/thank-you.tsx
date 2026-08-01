@@ -165,14 +165,16 @@ function ThankYou() {
         </div>
 
         {/* Warning about personal account */}
-        <div className="mt-6 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-left text-sm text-amber-900 dark:text-amber-100">
-          <p className="font-medium">Temporary payment arrangement</p>
-          <p className="mt-1 text-xs leading-relaxed opacity-90">
-            We are currently finalizing our official business bank account.
-            Payments are temporarily received into the founder’s personal account.
-            Your order is fully protected and we will update the account details as soon as the business account is ready.
-          </p>
-        </div>
+<div className="mt-6 rounded-xl border border-amber-500/60 bg-amber-500/15 p-4 text-left">
+  <p className="font-semibold text-amber-400">
+    Temporary payment arrangement
+  </p>
+  <p className="mt-1.5 text-sm leading-relaxed text-amber-100/90">
+    We are currently finalizing our official business bank account.  
+    Payments are temporarily received into the founder’s personal account.  
+    Your order is fully protected and we will update the account details as soon as the business account is ready.
+  </p>
+</div>
 
         {/* Bank transfer details */}
         <div className="mt-6 border border-border p-6 text-left space-y-3">
