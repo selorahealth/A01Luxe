@@ -185,13 +185,17 @@ function ThankYou() {
           {p?.bankName && <Row label="Bank" value={p.bankName} />}
           {p?.accountName && <Row label="Account name" value={p.accountName} />}
           {p?.accountNumber && (
-            <Row
-              label="Account number"
-              value={p.accountNumber}
-              onCopy={() => copy("acct", p.accountNumber)}
-              copied={copied === "acct"}
-            />
-          )}
+  <Row
+    label="Account number"
+    value={
+      p.accountNumber.length > 3
+        ? `${p.accountNumber.slice(0, 3)}*****`
+        : p.accountNumber
+    }
+    onCopy={() => copy("acct", p.accountNumber)}   // full number goes to clipboard
+    copied={copied === "acct"}
+  />
+)}
 
           <div className="pt-3 mt-2 border-t border-border">
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -203,24 +207,24 @@ function ThankYou() {
 
         {/* Receipt upload */}
         {digits && (
-          <motion.label
-            initial={{ scale: 1 }}
-            animate={{ scale: [1, 1.02, 1] }}
-            transition={{ repeat: Infinity, duration: 2.2 }}
-            className="mt-6 w-full inline-flex cursor-pointer items-center justify-center gap-2 px-5 py-4 text-white font-black uppercase text-base sm:text-lg tracking-widest shadow-lg active:scale-[0.98] transition-transform"
-            style={{ backgroundColor: "#25D366" }}
-          >
-            <Icon name="file-up-outline" size={22} />
-            {uploading ? "Uploading receipt…" : "Upload your receipt after payment"}
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              disabled={uploading}
-              className="hidden"
-              onChange={(e) => uploadReceipt(e.target.files?.[0] ?? null)}
-            />
-          </motion.label>
-        )}
+  <motion.label
+    initial={{ scale: 1 }}
+    animate={{ scale: [1, 1.02, 1] }}
+    transition={{ repeat: Infinity, duration: 2.2 }}
+    className="mt-6 w-full inline-flex cursor-pointer items-center justify-center gap-2 px-5 py-4 text-white font-black uppercase text-base sm:text-lg tracking-widest shadow-lg active:scale-[0.98] transition-transform"
+    style={{ backgroundColor: "#25D366" }}
+  >
+    <span className="text-xl leading-none">→</span>
+    {uploading ? "Uploading receipt…" : "Upload your receipt after payment"}
+    <input
+      type="file"
+      accept="image/*,application/pdf"
+      disabled={uploading}
+      className="hidden"
+      onChange={(e) => uploadReceipt(e.target.files?.[0] ?? null)}
+    />
+  </motion.label>
+)}
 
         {/* Paystack section */}
         <div className="mt-10 pt-8 border-t border-border">
