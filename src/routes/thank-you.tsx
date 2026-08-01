@@ -201,12 +201,15 @@ function ThankYou() {
   />
 )}
 
-          <div className="pt-3 mt-2 border-t border-border">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              <span className="font-semibold text-foreground">Important:</span> Please use your{" "}
-              <span className="font-mono font-bold text-foreground">{order}</span> as the payment reference when making the transfer.
-            </p>
-          </div>
+          <div className="pt-3 mt-2 border-t border-border space-y-2">
+  <p className="text-xs text-muted-foreground leading-relaxed">
+    <span className="font-semibold text-foreground">Important:</span> Please use your{" "}
+    <span className="font-mono font-bold text-foreground">{order}</span> as the payment reference when making the transfer.
+  </p>
+  <p className="text-xs text-muted-foreground leading-relaxed">
+    Once your payment is confirmed, we will always send you an official receipt for your order.
+  </p>
+</div>
         </div>
 
         {/* Receipt upload */}
