@@ -24,23 +24,49 @@ export function PaystackButton({
 }: Props) {
   const [loading, setLoading] = useState(false);
 
+  const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+
   const payWithPaystack = () => {
+    if (!publicKey) {
+      toast.error("Paystack is not configured. Missing public key.");
+      return;
+    }
+
+    if (!window.PaystackPop) {
+      toast.error("Paystack script is still loading. Please try again in a moment.");
+      return;
+    }
+
+    if (!email || !email.includes("@")) {
+      toast.error("A valid email is required for payment.");
+      return;
+    }
+
     setLoading(true);
 
     const handler = window.PaystackPop.setup({
-      key: "pk_test_a237a23a24c0339bf69dc33dfc020d219bcba0cf", // ← your Test Public Key
-      email: email,
-      amount: amount * 100, // Paystack expects kobo
+      key: publicKey,
+      email,
+      amount: Math.round(amount * 100), // Convert Naira → kobo
       currency: "NGN",
       ref: `${orderId}-${Date.now()}`,
       metadata: {
         order_id: orderId,
         customer_name: customerName,
+        custom_fields: [
+          {
+            display_name: "Order ID",
+            variable_name: "order_id",
+            value: orderId,
+          },
+        ],
       },
       callback: function (response: any) {
         setLoading(false);
         toast.success("Payment successful!");
-        if (onSuccess) onSuccess(response.reference);
+        if (onSuccess) {
+          onSuccess(response.reference);
+        }
       },
       onClose: function () {
         setLoading(false);
