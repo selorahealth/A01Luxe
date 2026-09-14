@@ -14,7 +14,7 @@ import { PaystackButton } from "@/components/checkout/PaystackButton";
 // ============================================================
 // 🔧 EASY TOGGLE — Change this to true when Paystack is ready
 // ============================================================
-const PAYSTACK_ENABLED = false;
+const PAYSTACK_ENABLED = true;
 // ============================================================
 
 const search = z.object({
