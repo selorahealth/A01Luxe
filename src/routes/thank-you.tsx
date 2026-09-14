@@ -165,7 +165,7 @@ function ThankYou() {
         </div>
 
         {/* Warning about personal account */}
-<div className="mt-6 rounded-xl border border-amber-500/60 bg-amber-500/15 p-4 text-left">
+{/* <div className="mt-6 rounded-xl border border-amber-500/60 bg-amber-500/15 p-4 text-left">
   <p className="font-semibold text-amber-400">
     Temporary payment arrangement
   </p>
@@ -178,7 +178,7 @@ function ThankYou() {
     After making the transfer, take a screenshot of your transaction or save the receipt as a PDF or image. 
     Then click on the upload button below to send your receipt to our Customer Representative.
   </p>
-</div>
+</div> */}
 
         {/* Bank transfer details */}
         <div className="mt-6 border border-border p-6 text-left space-y-3">
