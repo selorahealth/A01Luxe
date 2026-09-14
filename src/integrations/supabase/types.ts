@@ -45,6 +45,7 @@ export type Database = {
           id: string
           items: Json
           order_id: string
+          receipt_url: string | null
           status: string
           total_cents: number
           updated_at: string
@@ -55,6 +56,7 @@ export type Database = {
           id?: string
           items: Json
           order_id: string
+          receipt_url?: string | null
           status?: string
           total_cents: number
           updated_at?: string
@@ -65,6 +67,7 @@ export type Database = {
           id?: string
           items?: Json
           order_id?: string
+          receipt_url?: string | null
           status?: string
           total_cents?: number
           updated_at?: string
