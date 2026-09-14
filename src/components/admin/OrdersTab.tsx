@@ -58,7 +58,7 @@ export function OrdersTab() {
       
       // Also update the currently open modal
       if (openOrder) {
-        const fresh = (await listOrders()) as Order[];
+        const fresh = (await listOrders()) as unknown as Order[];
         const updated = fresh.find(o => o.id === openOrder.id || o.order_id === openOrder.order_id);
         if (updated) setOpenOrder(updated);
       }

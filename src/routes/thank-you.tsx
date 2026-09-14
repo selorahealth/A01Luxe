@@ -61,11 +61,12 @@ function ThankYou() {
 
     async function loadOrder() {
       const { data } = await supabase.rpc("track_order_public", {
-        _order_id: order,
+        _order_id: order as string,
       });
-      if (data?.[0]) {
-        setCustomerEmail(data[0].customer?.email || "");
-        setCustomerName(data[0].customer?.name || "");
+      const row = data?.[0] as { customer?: { email?: string; name?: string } } | undefined;
+      if (row) {
+        setCustomerEmail(row.customer?.email || "");
+        setCustomerName(row.customer?.name || "");
       }
     }
     loadOrder();
