@@ -26,7 +26,7 @@ export default defineConfig({
         manifest: false, // manifest is a hand-written file in public/
         workbox: {
           globPatterns: ["**/*.{js,css,ico,png,woff,woff2,ttf}"],
-          navigateDenylist: [/^\/~oauth/],
+          navigateFallbackDenylist: [/^\/~oauth/],
           runtimeCaching: [
             {
               // Offline-first app shell for page loads: try network, fall back to cache.
