@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getSimpleStats } from "@/lib/simple-admin/simple.functions";
-import type { QueuedProduct } from "@/lib/simple-admin/offlineQueue";
 
 export type { SimpleStats };
 
