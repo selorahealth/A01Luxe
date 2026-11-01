@@ -49,6 +49,13 @@ import {
   Save,
   Download,
   DollarSign,
+  Home,
+  LayoutGrid,
+  Send,
+  Image as ImageIcon,
+  Cloud,
+  CloudOff,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -107,6 +114,13 @@ const MAP: Record<string, LucideIcon> = {
   "download-outline": Download,
   "cash-outline": DollarSign,
   "person-outline": User,
+  "home-outline": Home,
+  "grid-outline": LayoutGrid,
+  "send-outline": Send,
+  "image-outline": ImageIcon,
+  "cloud-outline": Cloud,
+  "cloud-offline-outline": CloudOff,
+  "chatbubble-outline": MessageSquare,
 };
 
 // Premium, elegant tote / handbag icon rendered inline as an SVG.
