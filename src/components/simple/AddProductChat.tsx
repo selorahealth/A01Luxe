@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Icon } from "@/components/site/Icon";
 import { missingFields, parseProductFromText } from "@/lib/simple-admin/parseProduct";

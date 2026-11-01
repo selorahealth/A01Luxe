@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useQueryClient, useServerFn } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { deleteAdminProduct, listAdminProducts, saveAdminProduct } from "@/lib/admin-products.functions";
 import { formatBase } from "@/lib/currency";
 import { Icon } from "@/components/site/Icon";

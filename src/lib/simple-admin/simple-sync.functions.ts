@@ -3,8 +3,6 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getSimpleStats } from "@/lib/simple-admin/simple.functions";
 
-export type { SimpleStats };
-
 export { getSimpleStats };
 
 /**
@@ -56,8 +54,3 @@ export const createSyncedProduct = createServerFn({ method: "POST" })
     if (error) throw error;
     return { slug: created.slug as string };
   });
-
-export type SyncQueueResult = { synced: number; failed: number };
-
-/** Retry any failed queue item. Exposed so the UI can offer a manual retry. */
-export async function ensureQueueType(_item?: QueuedProduct): Promise<void> {}
